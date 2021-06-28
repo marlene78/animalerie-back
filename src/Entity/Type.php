@@ -28,6 +28,8 @@ class Type
      */
     private $nom;
 
+    
+
     /**
      * @ORM\OneToMany(targetEntity=Animaux::class, mappedBy="type")
      */
