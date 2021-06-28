@@ -1,0 +1,26 @@
+version: '3.6'
+services:
+  php:
+    container_name: php
+    build: ./
+    ports: 
+      - 5000:8000
+    volumes: 
+      - ./:/var/www/html
+  db:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: root
+  phpmyadmin_chocometry:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - "8081:80"
+    restart: always
+    depends_on:
+      - db 
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: root
