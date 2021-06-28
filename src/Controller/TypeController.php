@@ -34,8 +34,11 @@ class TypeController extends AbstractController
         }
     }
 
+
+
+
     /**
-     * @Route("/new", name="type_new", methods={"GET","POST"})
+     * @Route("/new", name="type_new", methods={"POST"})
      */
     public function new(Request $request , ValidatorInterface $validator): Response
     {
@@ -52,8 +55,8 @@ class TypeController extends AbstractController
 
             }else{
                 $em = $this->getDoctrine()->getManager(); 
-                $em->flush();
                 $em->persist($type); 
+                $em->flush();
                 return $this->json($type, 200 , ['groups' => 'get:infoType']); 
             }
 
@@ -63,6 +66,8 @@ class TypeController extends AbstractController
 
        
     }
+
+
 
     /**
      * @Route("/{id}", name="type_show", methods={"GET"})
@@ -77,7 +82,7 @@ class TypeController extends AbstractController
                 "cache-control" => "public, max-age=1000"
             ];
             
-            return $this->json($nourriture, 200 ,  $headers , ['groups' => 'get:infoFood']); 
+            return $this->json($type, 200 ,  $headers , ['groups' => 'get:infoType']); 
 
         }else{
             return $this->json(['status' => 404 , 'message' => "Ressource non trouvé"]); 
@@ -86,37 +91,50 @@ class TypeController extends AbstractController
            
     }
 
+
+
+
+
     /**
-     * @Route("/{id}/edit", name="type_edit", methods={"GET","POST"})
+     * @Route("/{id}/edit", name="type_edit", methods={"PUT"})
      */
-    public function edit(Request $request, Type $type): Response
+    public function edit(Request $request, Type $type , ValidatorInterface $validator ): Response
     {
-        $form = $this->createForm(TypeType::class, $type);
-        $form->handleRequest($request);
+        try{
+            $type->setNom($request->get('nom')); 
+            $errors = $validator->validate($type);
+            
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            if (count($errors) > 0) {
+                return $this->json($errors , 400);
 
-            return $this->redirectToRoute('type_index');
+            }else{
+                $em = $this->getDoctrine()->getManager(); 
+                $em->persist($type); 
+                return $this->json($type, 201 , ['groups' => 'get:infoType']); 
+            }
+
+        }catch(TypeError $e){
+            return $this->json($e->getMessage() , 400);
         }
 
-        return $this->render('type/edit.html.twig', [
-            'type' => $type,
-            'form' => $form->createView(),
-        ]);
+
+       
     }
 
     /**
-     * @Route("/{id}", name="type_delete", methods={"POST"})
+     * @Route("/{id}", name="type_delete", methods={"DELETE"})
      */
-    public function delete(Request $request, Type $type): Response
+    public function delete(Type $type): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$type->getId(), $request->request->get('_token'))) {
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->remove($type);
-            $entityManager->flush();
-        }
+       
+        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->remove($type);
+        $entityManager->flush();
 
-        return $this->redirectToRoute('type_index');
+        return $this->json([
+            "status" => 201,
+            "message" => "Ressource supprimé"
+        ]); 
     }
 }

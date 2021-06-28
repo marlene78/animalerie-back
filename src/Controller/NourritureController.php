@@ -24,12 +24,13 @@ class NourritureController extends AbstractController
      */
     public function index(NourritureRepository $nourritureRepository)
     {
-        $headers = [
-            "content-type" => "Application/json",
-            "cache-control" => "public, max-age=1000"
-        ];
-
+     
         if(count($nourritureRepository->findAll()) > 0){
+            $headers = [
+                "content-type" => "Application/json",
+                "cache-control" => "public, max-age=1000"
+            ];
+
             return $this->json($nourritureRepository->findAll(), 200 ,  $headers , ['groups' => 'get:infoFood']); 
         }else{
             return $this->json(['status' => 404 , 'message' => 'Liste vide']); 
@@ -63,8 +64,8 @@ class NourritureController extends AbstractController
 
             }else{
                 $em = $this->getDoctrine()->getManager(); 
-                $em->flush();
                 $em->persist($nourriture); 
+                $em->flush();
                 return $this->json($nourriture, 200 , ['groups' => 'get:infoFood']); 
             }
 
