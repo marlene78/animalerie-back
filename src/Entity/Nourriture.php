@@ -4,9 +4,13 @@ namespace App\Entity;
 
 use App\Repository\NourritureRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
 
 /**
  * @ORM\Entity(repositoryClass=NourritureRepository::class)
+ * @UniqueEntity("nom")
  */
 class Nourriture
 {
@@ -19,16 +23,29 @@ class Nourriture
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(
+     * message = "Veuillez saisir un nom"
+     * )
      */
     private $nom;
 
     /**
      * @ORM\Column(type="text")
+     * @Assert\NotBlank(
+     * message = "Veuillez saisir une description"
+     * )
      */
     private $description;
 
     /**
      * @ORM\Column(type="float")
+     * @Assert\NotBlank(
+     *  message = "Veuillez saisir un prix"
+     * )
+     * @Assert\Type(
+     *   type="float",
+     *   message="Veuillez saisir un nombre"
+     * )
      */
     private $prix;
 
@@ -37,6 +54,8 @@ class Nourriture
      * @ORM\JoinColumn(nullable=false)
      */
     private $type;
+
+
 
     public function getId(): ?int
     {
