@@ -221,9 +221,12 @@ class Utilisateur
 
     /**
      * @ORM\PrePersist
+     * @ORM\PreUpdate
      */
     public function cryptPassword()
     {
-        $this->motDePasse = password_hash($this->motDePasse, null);
+        if($this->motDePasse){
+            $this->motDePasse = password_hash($this->motDePasse, null);
+        }
     }
 }
