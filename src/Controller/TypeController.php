@@ -24,7 +24,8 @@ class TypeController extends AbstractController
     {
         $headers = [
             "content-type" => "Application/json",
-            "cache-control" => "public, max-age=1000"
+            "cache-control" => "public, max-age=1000",
+            "access-control-method" => "GET"
         ];
 
         if(count($typeRepository->findAll()) > 0){
@@ -79,7 +80,8 @@ class TypeController extends AbstractController
 
             $headers = [
                 "content-type" => "Application/json",
-                "cache-control" => "public, max-age=1000"
+                "cache-control" => "public, max-age=1000", 
+                "access-control-method" => "GET"
             ];
             
             return $this->json($type, 200 ,  $headers , ['groups' => 'get:infoType']); 
