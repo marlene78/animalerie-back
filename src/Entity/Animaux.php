@@ -2,8 +2,9 @@
 
 namespace App\Entity;
 
-use App\Repository\AnimauxRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\AnimauxRepository;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=AnimauxRepository::class)
@@ -14,6 +15,7 @@ class Animaux
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups("get:infoFood")
      */
     private $id;
 
@@ -21,29 +23,38 @@ class Animaux
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups("get:infoFood")
      */
     private $race;
 
     /**
      * @ORM\Column(type="float")
+     * @Groups("get:infoFood")
      */
     private $poids;
 
     /**
      * @ORM\Column(type="integer")
+     * @Groups("get:infoFood")
      */
     private $age;
 
     /**
      * @ORM\Column(type="float")
+     * @Groups("get:infoFood")
      */
     private $prix;
 
     /**
      * @ORM\ManyToOne(targetEntity=Type::class, inversedBy="animauxes")
      * @ORM\JoinColumn(nullable=false)
+     * @Groups("get:infoFood")
      */
     private $type;
+
+
+
+
 
     public function getId(): ?int
     {

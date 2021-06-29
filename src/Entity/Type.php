@@ -2,10 +2,11 @@
 
 namespace App\Entity;
 
-use App\Repository\TypeRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\TypeRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=TypeRepository::class)
@@ -16,13 +17,18 @@ class Type
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups("get:infoType")
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups("get:infoFood")
+     * @Groups("get:infoType")
      */
     private $nom;
+
+    
 
     /**
      * @ORM\OneToMany(targetEntity=Animaux::class, mappedBy="type")
