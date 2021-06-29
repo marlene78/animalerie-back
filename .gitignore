@@ -7,6 +7,7 @@
 /public/bundles/
 /var/
 /vendor/
+/.history
 ###< symfony/framework-bundle ###
 
 ###> symfony/phpunit-bridge ###
