@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Accessoire{% endblock %}
+
+{% block body %}
+    <h1>Create new Accessoire</h1>
+
+    {{ include('accessoire/_form.html.twig') }}
+
+    <a href="{{ path('accessoire_index') }}">back to list</a>
+{% endblock %}
