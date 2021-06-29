@@ -3,19 +3,16 @@
 namespace App\Entity;
 
 use App\Repository\UtilisateurRepository;
-
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\ArrayCollection;
-use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
 
 /**
  * @ORM\Entity(repositoryClass=UtilisateurRepository::class)
- * @ORM\HasLifecycleCallbacks()
  * @UniqueEntity("email")
- * @uniqueEntity("pseudo")
+ * @uniqueEntity("pseudo)
  */
 class Utilisateur
 {
@@ -29,6 +26,7 @@ class Utilisateur
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups("get:infoUtilisateur")
      * @Assert\NotBlank(
      * message = "Mot de passe requis"
      * )
@@ -37,7 +35,6 @@ class Utilisateur
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups("get:infoUtilisateur")
      * @Assert\NotBlank(
      * message = "Email requis"
      * )
@@ -61,7 +58,6 @@ class Utilisateur
 
     /**
      * @ORM\ManyToMany(targetEntity=Role::class, inversedBy="utilisateurs")
-     * @Groups("get:infoUtilisateur")
      */
     private $role;
 
@@ -217,13 +213,5 @@ class Utilisateur
         }
 
         return $this;
-    }
-
-    /**
-     * @ORM\PrePersist
-     */
-    public function cryptPassword()
-    {
-        $this->motDePasse = password_hash($this->motDePasse, null);
     }
 }

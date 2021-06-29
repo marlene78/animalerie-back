@@ -27,8 +27,7 @@ class Role
 
     /**
      * @Assert\NotBlank(message = "Nom requis")
-     * @Groups("get:infoRole")
-     * @Groups("get:infoUtilisateur")
+     * @Groups("get:infoFood")
      * @ORM\Column(type="string", length=255)
      */
     private $nom;

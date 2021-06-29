@@ -13,7 +13,6 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ORM\Entity(repositoryClass=UtilisateurRepository::class)
- * @ORM\HasLifecycleCallbacks()
  * @UniqueEntity("email")
  * @uniqueEntity("pseudo")
  */
@@ -225,5 +224,6 @@ class Utilisateur
     public function cryptPassword()
     {
         $this->motDePasse = password_hash($this->motDePasse, null);
+        var_dump('on passe ici ');
     }
 }

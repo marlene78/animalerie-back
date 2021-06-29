@@ -22,13 +22,14 @@ class Role
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      * @Groups("get:infoRole")
+     * @Groups("get:infoUtilisateur")
+
      */
     private $id;
 
     /**
      * @Assert\NotBlank(message = "Nom requis")
-     * @Groups("get:infoRole")
-     * @Groups("get:infoUtilisateur")
+     * @Groups("get:infoFood")
      * @ORM\Column(type="string", length=255)
      */
     private $nom;

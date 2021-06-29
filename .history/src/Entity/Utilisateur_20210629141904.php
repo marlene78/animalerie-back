@@ -13,7 +13,6 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ORM\Entity(repositoryClass=UtilisateurRepository::class)
- * @ORM\HasLifecycleCallbacks()
  * @UniqueEntity("email")
  * @uniqueEntity("pseudo")
  */

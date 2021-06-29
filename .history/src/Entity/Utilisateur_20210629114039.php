@@ -13,7 +13,6 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ORM\Entity(repositoryClass=UtilisateurRepository::class)
- * @ORM\HasLifecycleCallbacks()
  * @UniqueEntity("email")
  * @uniqueEntity("pseudo")
  */
@@ -29,6 +28,7 @@ class Utilisateur
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups("get:infoUtilisateur")
      * @Assert\NotBlank(
      * message = "Mot de passe requis"
      * )
@@ -37,7 +37,6 @@ class Utilisateur
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups("get:infoUtilisateur")
      * @Assert\NotBlank(
      * message = "Email requis"
      * )
@@ -61,7 +60,6 @@ class Utilisateur
 
     /**
      * @ORM\ManyToMany(targetEntity=Role::class, inversedBy="utilisateurs")
-     * @Groups("get:infoUtilisateur")
      */
     private $role;
 
@@ -217,13 +215,5 @@ class Utilisateur
         }
 
         return $this;
-    }
-
-    /**
-     * @ORM\PrePersist
-     */
-    public function cryptPassword()
-    {
-        $this->motDePasse = password_hash($this->motDePasse, null);
     }
 }

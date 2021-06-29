@@ -8,8 +8,6 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Component\Serializer\Annotation\Groups;
-
 
 /**
  * @ORM\Entity(repositoryClass=RoleRepository::class)
@@ -27,8 +25,7 @@ class Role
 
     /**
      * @Assert\NotBlank(message = "Nom requis")
-     * @Groups("get:infoRole")
-     * @Groups("get:infoUtilisateur")
+     * @Groups("get:infoFood")
      * @ORM\Column(type="string", length=255)
      */
     private $nom;

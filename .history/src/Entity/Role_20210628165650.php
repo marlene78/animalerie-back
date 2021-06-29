@@ -6,14 +6,9 @@ use App\Repository\RoleRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Component\Serializer\Annotation\Groups;
-
 
 /**
  * @ORM\Entity(repositoryClass=RoleRepository::class)
- * @uniqueEntity("nom")
  */
 class Role
 {
@@ -21,14 +16,10 @@ class Role
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups("get:infoRole")
      */
     private $id;
 
     /**
-     * @Assert\NotBlank(message = "Nom requis")
-     * @Groups("get:infoRole")
-     * @Groups("get:infoUtilisateur")
      * @ORM\Column(type="string", length=255)
      */
     private $nom;

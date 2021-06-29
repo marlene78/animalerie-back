@@ -3,24 +3,16 @@
 namespace App\Entity;
 
 use App\Repository\UtilisateurRepository;
-
-use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Annotation\Groups;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
-use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass=UtilisateurRepository::class)
- * @ORM\HasLifecycleCallbacks()
- * @UniqueEntity("email")
- * @uniqueEntity("pseudo")
  */
 class Utilisateur
 {
     /**
-     * @Groups("get:infoUtilisateur")
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
@@ -29,39 +21,26 @@ class Utilisateur
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank(
-     * message = "Mot de passe requis"
-     * )
      */
     private $motDePasse;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups("get:infoUtilisateur")
-     * @Assert\NotBlank(
-     * message = "Email requis"
-     * )
      */
     private $email;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups("get:infoUtilisateur")
-     * @Assert\NotBlank(
-     * message = "Pseudo requis"
-     * )
      */
     private $pseudo;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * @Groups("get:infoUtilisateur")
      */
     private $adresse;
 
     /**
      * @ORM\ManyToMany(targetEntity=Role::class, inversedBy="utilisateurs")
-     * @Groups("get:infoUtilisateur")
      */
     private $role;
 
@@ -217,13 +196,5 @@ class Utilisateur
         }
 
         return $this;
-    }
-
-    /**
-     * @ORM\PrePersist
-     */
-    public function cryptPassword()
-    {
-        $this->motDePasse = password_hash($this->motDePasse, null);
     }
 }

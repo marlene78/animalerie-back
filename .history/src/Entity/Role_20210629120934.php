@@ -22,6 +22,8 @@ class Role
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      * @Groups("get:infoRole")
+     * @Groups("get:infoUtilisateur")
+
      */
     private $id;
 
