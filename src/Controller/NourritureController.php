@@ -2,15 +2,17 @@
 
 namespace App\Controller;
 
+use TypeError;
 use App\Entity\Nourriture;
-use App\Repository\NourritureRepository;
 use App\Repository\TypeRepository;
+use App\Services\SendDataController;
+use App\Repository\NourritureRepository;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use TypeError;
 
 
 
@@ -22,55 +24,80 @@ class NourritureController extends AbstractController
     /**
      * @Route("/", name="nourriture_index", methods={"GET"})
      */
-    public function index(NourritureRepository $nourritureRepository)
+    public function index(NourritureRepository $nourritureRepository , SendDataController $send ,  SerializerInterface $serializer):JsonResponse
     {
-     
-        if(count($nourritureRepository->findAll()) > 0){
-            $headers = [
-                "content-type" => "Application/json",
-                "cache-control" => "public, max-age=1000"
-            ];
+        try{
 
-            return $this->json($nourritureRepository->findAll(), 200 ,  $headers , ['groups' => 'get:infoFood']); 
-        }else{
-            return $this->json(['status' => 404 , 'message' => 'Liste vide']); 
+            if(count($nourritureRepository->findAll()) > 0){
+                return $send->sendData(
+                    $serializer->serialize($nourritureRepository->findAll(),'json',['groups' => 'get:infoFood']), 
+                    $this->getEntityLinks(),
+                    200,
+                    "Ressources trouvées"
+                );
+            }else{
+                return $send->sendData("", $this->getEntityLinks(),404,"Liste vide");
+            }
+
+        }catch(TypeError $e){
+
+            return $send->sendData("", "",400,$e->getMessage());
         }
      
     
     }
 
+
+
+
+
     /**
      * @Route("/new", name="nourriture_new", methods={"POST"})
      */
-    public function new(Request $request ,ValidatorInterface $validator , TypeRepository $typeRepository)
+    public function new(Request $request ,ValidatorInterface $validator , TypeRepository $typeRepository ,SendDataController $send ,  SerializerInterface $serializer ):JsonResponse
     {
         
-        $nourriture = new Nourriture();
- 
         try{
-        
+
+            $nourriture = new Nourriture();
             $nourriture->setNom($request->get('nom')); 
             $nourriture->setDescription($request->get('description')); 
             $nourriture->setPrix($request->get('prix')); 
 
             $type = $typeRepository->findOneBy(['nom' => $request->get('type') ]); 
+            $type->addNourriture($nourriture);
             $nourriture->setType($type); 
 
+
             $errors = $validator->validate($nourriture);
-            
 
             if (count($errors) > 0) {
-                return $this->json($errors , 400);
+              
+                $errorTab = []; 
+
+                foreach ($errors as $error ) {
+                    $errorTab[] = $error->getMessage();
+                }
+
+                return $send->sendData("", "",400, $errorTab);
 
             }else{
                 $em = $this->getDoctrine()->getManager(); 
                 $em->persist($nourriture); 
                 $em->flush();
-                return $this->json($nourriture, 200 , ['groups' => 'get:infoFood']); 
+
+                return $send->sendData(
+                    $serializer->serialize($nourriture,'json',['groups' => 'get:infoFood']), 
+                    $this->getEntityLinks(),
+                    200,
+                    "Ressource mise à jour"
+                );
+
             }
 
         }catch(TypeError $e){
-            return $this->json($e->getMessage() , 400);
+           
+            return $send->sendData("", "",400,"Veuillez saisir un prix valide.");
         }
 
        
@@ -80,79 +107,129 @@ class NourritureController extends AbstractController
   
     }
 
+
+
+
+
     /**
      * @Route("/{id}", name="nourriture_show", methods={"GET"})
      */
-    public function show(NourritureRepository $nourritureRepository , Request $request): Response
+    public function show(Nourriture $nourriture , SendDataController $send ,  SerializerInterface $serializer ):JsonResponse
     { 
-        $nourriture = $nourritureRepository->find($request->get("id"));
-        if($nourriture){ 
-
-            $headers = [
-                "content-type" => "Application/json",
-                "cache-control" => "public, max-age=1000"
-            ];
-            
-            return $this->json($nourriture, 200 ,  $headers , ['groups' => 'get:infoFood']); 
-
-        }else{
-            return $this->json(['status' => 404 , 'message' => "Ressource non trouvé"]); 
-        }
-             
-           
-     
+        return $send->sendData(
+            $serializer->serialize($nourriture,'json',['groups' => 'get:infoFood']), 
+            $this->getEntityLinks(),
+            200,
+            "Ressource trouvée"
+        );       
     }
+
+
+
+
 
     /**
      * @Route("/{id}/edit", name="nourriture_edit", methods={"PUT"})
      */
-    public function edit(Request $request, Nourriture $nourriture , TypeRepository $typeRepository , ValidatorInterface $validator)
+    public function edit(Request $request, Nourriture $nourriture , TypeRepository $typeRepository , ValidatorInterface $validator , SendDataController $send ,  SerializerInterface $serializer):JsonResponse
     {
+
         try{
             $nourriture->setNom($request->get('nom')); 
             $nourriture->setDescription($request->get('description')); 
             $nourriture->setPrix($request->get('prix')); 
 
             $type = $typeRepository->findOneBy(['nom' => $request->get('type') ]); 
-            $nourriture->setType($type); 
 
+            $type->addNourriture($nourriture);
+            $nourriture->setType($type); 
+    
             $errors = $validator->validate($nourriture);
             
-
-            if (count($errors) > 0) {
         
-                return $this->json($errors , 400);
-            
+            if (count($errors) > 0) {
+                $errorTab = []; 
+
+                foreach ($errors as $error ) {
+                    $errorTab[] = $error->getMessage();
+                }
+
+                return $send->sendData("", "",400, $errorTab);
 
             }else{
-                $em = $this->getDoctrine()->getManager(); 
-                $em->persist($nourriture); 
-                return $this->json($nourriture, 201 , ['groups' => 'get:infoFood']); 
-            }
 
+                $em = $this->getDoctrine()->getManager(); 
+                $em->flush(); 
+        
+                return $send->sendData(
+                    $serializer->serialize($nourriture,'json',['groups' => 'get:infoFood']), 
+                    $this->getEntityLinks(),
+                    200,
+                    "Ressource mise à jour"
+                );
+        
+            
+            }
         }catch(TypeError $e){
-            return $this->json($e->getMessage() , 400);
+
+            return $send->sendData("", "",404,$e->getMessage());
         }
 
 
 
+
     }
+
+
+
+
 
 
 
     /**
      * @Route("/{id}", name="nourriture_delete", methods={"DELETE"})
      */
-    public function delete(Nourriture $nourriture)
+    public function delete(Nourriture $nourriture , SendDataController $send ): JsonResponse
     {
+        try{
+    
+            $entityManager = $this->getDoctrine()->getManager();
+            if($nourriture->getType() != null){
+                $type = $nourriture->getType(); 
+                $type->removeNourriture($nourriture);
+            }
 
-        $entityManager = $this->getDoctrine()->getManager();
-        $entityManager->remove($nourriture);
-        $entityManager->flush();
+            $entityManager->remove($nourriture);
+            $entityManager->flush();
 
-        return $this->json([
-            "status" => 201,
-            "message" => "Ressource supprimé"
-        ]); 
+            return $send->sendData("", $this->getEntityLinks(),201,"Ressource supprimée");
+
+        }catch(TypeError $e){
+            return $send->sendData("", "",400,$e->getMessage());
+        }
+
     }
+
+
+
+
+
+
+
+    /**
+     * Renvoi la liste des links
+     * @return array
+     */
+    public function getEntityLinks (){
+        return[
+            "GET" => "localhost:5000/nourriture",
+            "GET" => "localhost:5000/nourriture/{id}/",
+            "POST" => "localhost:5000/nourriture/new",
+            "PUT" => "localhost:5000/nourriture/{id}/edit",
+            "DELETE" => "localhost:5000/nourriture/{id}",
+        ];
+    }
+
+
+
 }
