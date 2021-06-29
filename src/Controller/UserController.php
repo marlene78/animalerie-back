@@ -8,10 +8,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\UtilisateurRepository;
 use Symfony\Component\HttpFoundation\Request;
 use App\Entity\Utilisateur;
-use App\Entity\Role;
 use App\Repository\RoleRepository;
-use PhpParser\Node\Stmt\TryCatch;
-use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
