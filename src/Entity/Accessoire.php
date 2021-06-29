@@ -29,9 +29,9 @@ class Accessoire
 
     /**
      * @ORM\ManyToOne(targetEntity=Type::class, inversedBy="accessoires")
-     * @ORM\JoinColumn(nullable=false)
      */
     private $type;
+
 
     public function getId(): ?int
     {
@@ -73,4 +73,6 @@ class Accessoire
 
         return $this;
     }
+
+ 
 }

@@ -8,7 +8,6 @@ use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
-
 /**
  * @ORM\Entity(repositoryClass=NourritureRepository::class)
  * @UniqueEntity("nom")
@@ -25,9 +24,7 @@ class Nourriture
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank(
-     * message = "Veuillez saisir un nom"
-     * )
+     * @Assert\NotBlank(message = "Veuillez saisir un nom")
      * @Groups("get:infoFood")
      */
     private $nom;
@@ -49,14 +46,15 @@ class Nourriture
      */
     private $prix;
 
-
-
     /**
-     * @ORM\ManyToOne(targetEntity=Type::class, inversedBy="nourritures")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\ManyToOne(targetEntity=Type::class, inversedBy="nourritures" , cascade={"persist", "remove"})
      * @Groups("get:infoFood")
      */
     private $type;
+
+
+
+  
 
 
 
@@ -112,4 +110,6 @@ class Nourriture
 
         return $this;
     }
+
+   
 }

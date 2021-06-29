@@ -2,18 +2,20 @@
 
 namespace App\Controller;
 
-use Exception;
+
+use Symfony\Component\ErrorHandler\Exception\FlattenException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 
 
 class ErrorController {
 
-    public function show(Exception $exception){
+    public function show(FlattenException $exception){ 
+      
         return new JsonResponse([
-            'message' => $exception->getMessage(),
-            'statutCode' => 404,
-        ] , 404);
+            'message' => $exception->getStatusText(),
+            'statusCode' => $exception->getStatusCode()
+        ]);
     }
 
 }
