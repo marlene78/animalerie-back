@@ -33,10 +33,14 @@ class Accessoire
 
     /**
      * @ORM\ManyToOne(targetEntity=Type::class, inversedBy="accessoires")
+<<<<<<< HEAD
      * @ORM\JoinColumn(nullable=false)
      * @Groups("get:infoAccessoire")
+=======
+>>>>>>> acc396f077ad5ad85b10245bb5b160c6d07529e7
      */
     private $type;
+
 
     public function getId(): ?int
     {

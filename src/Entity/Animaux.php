@@ -5,6 +5,8 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\AnimauxRepository;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
+
 
 /**
  * @ORM\Entity(repositoryClass=AnimauxRepository::class)
@@ -15,7 +17,7 @@ class Animaux
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups("get:infoFood")
+     * @Groups("get:infoAnimaux")
      */
     private $id;
 
@@ -23,37 +25,45 @@ class Animaux
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups("get:infoFood")
+     * @Groups("get:infoAnimaux")
      */
     private $race;
 
     /**
      * @ORM\Column(type="float")
-     * @Groups("get:infoFood")
+     * @Groups("get:infoAnimaux")
+     * @Assert\NotBlank(message = "Veuillez saisir un poids")
+     * @Assert\Type(type="float",message="Veuillez saisir un nombre")
      */
     private $poids;
 
     /**
      * @ORM\Column(type="integer")
-     * @Groups("get:infoFood")
+     * @Groups("get:infoAnimaux")
+     * @Assert\NotBlank(message = "Veuillez saisir un âge")
+     * @Assert\Type(type="integer",
+     *  message="Veuillez saisir un nombre"
+     * )
      */
     private $age;
 
     /**
      * @ORM\Column(type="float")
-     * @Groups("get:infoFood")
+     * @Groups("get:infoAnimaux")
+     * @Assert\NotBlank(message = "Veuillez saisir un prix")
+     * @Assert\Type(type="float",
+     *  message="Veuillez saisir un nombre"
+     * )
      */
     private $prix;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Type::class, inversedBy="animauxes")
-     * @ORM\JoinColumn(nullable=false)
-     * @Groups("get:infoFood")
+     * @ORM\ManyToOne(targetEntity=Type::class, inversedBy="animauxes" , cascade={"persist", "remove"})
+     * @Groups("get:infoAnimaux")
      */
     private $type;
 
-
-
+   
 
 
     public function getId(): ?int
@@ -122,4 +132,6 @@ class Animaux
 
         return $this;
     }
+
+   
 }
