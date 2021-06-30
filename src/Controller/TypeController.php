@@ -4,46 +4,57 @@ namespace App\Controller;
 
 use TypeError;
 use App\Entity\Type;
-use PhpParser\Node\Stmt\TryCatch;
+use App\Repository\AccessoireRepository;
+use App\Repository\AnimauxRepository;
+use App\Repository\NourritureRepository;
 use App\Repository\TypeRepository;
+use App\Services\EntityLinks;
 use App\Services\SendDataController;
-use Doctrine\DBAL\Types\TypeRegistry;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
 
 /**
  * @Route("/type")
  */
 class TypeController extends AbstractController
 {
+  
+    
     /**
+     * Affiche la liste des types
      * @Route("/", name="type_index", methods={"GET"})
+     * @param TypeRepository $typeRepository
+     * @param SendDataController $send
+     * @param SerializerInterface $serializer
+     * @param Request $request
+     * @return JsonResponse
      */
-    public function index(TypeRepository $typeRepository , SendDataController $send ,  SerializerInterface $serializer)
+    public function index(
+        TypeRepository $typeRepository , 
+        SendDataController $send ,  
+        SerializerInterface $serializer , 
+        Request $request
+    ):JsonResponse
     {
 
-       
         try{
 
             if(count($typeRepository->findAll()) > 0){
             
                 return $send->sendData(
                     $serializer->serialize($typeRepository->findAll(),'json',['groups' => 'get:infoType']), 
-                    $this->getEntityLinks(),
+                    ["POST" => "".$request->server->get('HTTP_HOST')."/type/new"],
                     200,
                     "Ressources trouvées"
                 );
-
-
             }else{
 
-                return $send->sendData("", $this->getEntityLinks(),404,"Liste vide");
+                return $send->sendData("", "",404,"Liste vide");
             }
 
         }catch(TypeError $e){
@@ -55,10 +66,24 @@ class TypeController extends AbstractController
 
 
 
+   
     /**
+     * Création d'un nouveau type
      * @Route("/new", name="type_new", methods={"POST"})
+     * @param Request $request
+     * @param ValidatorInterface $validator
+     * @param SendDataController $send
+     * @param SerializerInterface $serializer
+     * @param EntityLinks $links
+     * @return JsonResponse
      */
-    public function new(Request $request , ValidatorInterface $validator ,SendDataController $send ,  SerializerInterface $serializer)
+    public function new(
+        Request $request , 
+        ValidatorInterface $validator ,
+        SendDataController $send ,
+        SerializerInterface $serializer , 
+        EntityLinks $links
+    ):JsonResponse
     {
        
         try{
@@ -68,8 +93,13 @@ class TypeController extends AbstractController
             $errors = $validator->validate($type);
             
             if (count($errors) > 0) {
-                $errors == "" ?  $errors = "".$request->get('nom')." existe déjà" : $errors; 
-                return $send->sendData("", "",400,$errors);
+                $errorTab = []; 
+
+                foreach ($errors as $error ) {
+                    $errorTab[] = $error->getMessage();
+                }
+
+                return $send->sendData("", "",400, $errorTab);
 
             }else{
                 $em = $this->getDoctrine()->getManager(); 
@@ -78,9 +108,9 @@ class TypeController extends AbstractController
          
                 return $send->sendData(
                     $serializer->serialize($type,'json',['groups' => 'get:infoType']), 
-                    $this->getEntityLinks(),
-                    200,
-                    "Ressource mise à jour"
+                    $links->getEntityLinks( $type->getId() ,"POST" , $request->server->get('HTTP_HOST') , "type"),
+                    201,
+                    "Ressource crée"
                 );
 
             }
@@ -95,14 +125,28 @@ class TypeController extends AbstractController
 
 
 
+    
     /**
+     * Affiche un type en fonction de son ID
      * @Route("/{id}", name="type_show", methods={"GET"} )
+     * @param Type $type
+     * @param SendDataController $send
+     * @param SerializerInterface $serializer
+     * @param Request $request
+     * @param EntityLinks $links
+     * @return JsonResponse
      */
-    public function show(Type $type , SendDataController $send ,  SerializerInterface $serializer): JsonResponse
+    public function show(
+        Type $type , 
+        SendDataController $send ,
+        SerializerInterface $serializer ,
+        Request $request ,
+        EntityLinks $links
+    ):JsonResponse
     {
         return $send->sendData(
             $serializer->serialize($type,'json',['groups' => 'get:infoType']), 
-            $this->getEntityLinks(),
+            $links->getEntityLinks( $type->getId() , "GET" , $request->server->get('HTTP_HOST') , "type"),
             200,
             "Ressource trouvée"
         );
@@ -113,10 +157,26 @@ class TypeController extends AbstractController
 
 
 
+    
     /**
+     * Éditer un type en fonction de son ID
      * @Route("/{id}/edit", name="type_edit", methods={"PUT"})
+     * @param Request $request
+     * @param TypeRepository $typeRepository
+     * @param ValidatorInterface $validator
+     * @param SendDataController $send
+     * @param SerializerInterface $serializer
+     * @param EntityLinks $links
+     * @return JsonResponse
      */
-    public function edit(Request $request, TypeRepository $typeRepository, ValidatorInterface $validator ,  SendDataController $send ,  SerializerInterface $serializer): JsonResponse
+    public function edit(
+        Request $request, 
+        TypeRepository $typeRepository,
+        ValidatorInterface $validator ,
+        SendDataController $send ,
+        SerializerInterface $serializer ,
+        EntityLinks $links
+    ):JsonResponse
     {
 
         try{
@@ -126,8 +186,11 @@ class TypeController extends AbstractController
         
             if (count($errors) > 0) {
 
-                $errors == "" ?  $errors = "".$request->get('nom')." existe déjà" : $errors; 
-                return $send->sendData("", "",400,$errors);
+                foreach ($errors as $error ) {
+                    $errorTab[] = $error->getMessage();
+                }
+
+                return $send->sendData("", "",400, $errorTab);
 
             }else{
 
@@ -136,9 +199,9 @@ class TypeController extends AbstractController
         
                 return $send->sendData(
                     $serializer->serialize($type,'json',['groups' => 'get:infoType']), 
-                    $this->getEntityLinks(),
-                    200,
-                    "Ressource mit à jour"
+                    $links->getEntityLinks( $type->getId() , "PUT" , $request->server->get('HTTP_HOST') , 'type'),
+                    201,
+                    "Ressource mise à jour"
                 );
         
             
@@ -156,16 +219,27 @@ class TypeController extends AbstractController
 
     
     /**
+     * Supprimer un type en fonction de son ID
      * @Route("/{id}", name="type_delete", methods={"DELETE"})
+     * @param Type $type
+     * @param SendDataController $send
+     * @return JsonResponse
      */
-    public function delete(Type $type , SendDataController $send ):JsonResponse
+    public function delete(Type $type , SendDataController $send , AnimauxRepository $animauxRepository , NourritureRepository $nourritureRepository , AccessoireRepository $accessoireRepository ): JsonResponse
     {
+
         try{
             $entityManager = $this->getDoctrine()->getManager();
+    
+            $this->deleteItem( $animauxRepository->findBy(["type" => $type->getId()]) ); 
+            $this->deleteItem($nourritureRepository->findBy(["type" => $type->getId()])); 
+            $this->deleteItem($accessoireRepository->findBy(["type" => $type->getId()])); 
+        
+
             $entityManager->remove($type);
             $entityManager->flush();
 
-            return $send->sendData("", $this->getEntityLinks(),201,"Ressource supprimée");
+            return $send->sendData("", "",201,"Ressource supprimée");
 
         }catch(TypeError $e){
             return $send->sendData("", "",400,$e->getMessage());
@@ -177,20 +251,14 @@ class TypeController extends AbstractController
 
 
 
-
-    /**
-     * Renvoi la liste des links
-     * @return array
-     */
-    public function getEntityLinks (){
-        return[
-            "GET" => "localhost:5000/type",
-            "GET" => "localhost:5000/type/{id}/",
-            "POST" => "localhost:5000/type/new",
-            "PUT" => "localhost:5000/type/{id}/edit",
-            "DELETE" => "localhost:5000/type/{id}"
-        ];
+    private function deleteItem($tab){
+        if(count($tab) > 0){
+            foreach ($tab as $item) {
+                $item->setType(null);
+            }
+        }
     }
+
 
 
 

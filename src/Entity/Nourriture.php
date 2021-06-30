@@ -47,10 +47,11 @@ class Nourriture
     private $prix;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Type::class, inversedBy="nourritures" , cascade={"persist", "remove"})
+     * @ORM\ManyToOne(targetEntity=Type::class)
      * @Groups("get:infoFood")
      */
     private $type;
+
 
 
 
@@ -110,6 +111,7 @@ class Nourriture
 
         return $this;
     }
+
 
    
 }
