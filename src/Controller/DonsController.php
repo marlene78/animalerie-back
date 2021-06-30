@@ -4,7 +4,9 @@ namespace App\Controller;
 
 use App\Entity\Dons;
 use App\Form\DonsType;
+use App\Services\EntityLinks;
 use App\Repository\DonsRepository;
+use App\Services\SendDataController;
 use App\Repository\UtilisateurRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -38,16 +40,19 @@ class DonsController extends AbstractController
     /**
      * @Route("/new", name="dons_new", methods={"POST"})
      */
-    public function new(Request $request,DonsRepository $donsRepository, UtilisateurRepository $userRepository, ValidatorInterface $validator , SerializerInterface $serializer): Response
+    public function new(
+        Request $request,
+        DonsRepository $donsRepository, 
+        UtilisateurRepository $userRepository, 
+        ValidatorInterface $validator , 
+        SerializerInterface $serializer,
+        EntityLinks $links,
+        SendDataController $send 
+        ): Response
     {
         $don = new Dons();
-        
-        $headers = [
-            "content-type" => "Application/json",
-            "cache-control" => "public, max-age=1000"
-        ];
 
-        try {
+        try{
             $don->setMontant($request->get('montant'));
             $don->setMessage($request->get('message')); 
 
@@ -55,19 +60,33 @@ class DonsController extends AbstractController
             $don->setUser($user); 
 
             $errors = $validator->validate($don);
+            
             if (count($errors) > 0) {
-                return $this->json($errors , 400);
-            }else {
+                $errorTab = []; 
+
+                foreach ($errors as $error ) {
+                    $errorTab[] = $error->getMessage();
+                }
+
+                return $send->sendData("", "",400, $errorTab);
+
+            }else{
                 $em = $this->getDoctrine()->getManager(); 
                 $em->persist($don); 
                 $em->flush();
+         
+                return $send->sendData(
+                    $serializer->serialize($don,'json',['groups' => 'get:infoDons']), 
+                    $links->getEntityLinks( $don->getId() ,"POST" , $request->server->get('HTTP_HOST') , "dons"),
+                    201,
+                    "Ressource crée"
+                );
 
-                $json = $serializer->serialize($donsRepository->find($don->getId()), 'json', ['groups' => ['get:infoDons']]);
-                return $this->json(json_decode($json), 201, $headers); 
             }
-            
-        } catch (\Throwable $th) {
-            return $this->json($th->getMessage(), 400, $headers);
+
+        }catch(TypeError $e){
+           
+            return $send->sendData("", "",400,$e->getMessage());
         }
   
     }
@@ -75,36 +94,42 @@ class DonsController extends AbstractController
     /**
      * @Route("/{id}", name="dons_show", methods={"GET"})
      */
-    public function show(Dons $don, Request $request, DonsRepository $donsRepository): Response
+    public function show(
+        Dons $don, 
+        Request $request,
+        SendDataController $send ,  
+        SerializerInterface $serializer,  
+        EntityLinks $links): Response
     {
-        $don = $donsRepository->find($request->get("id"));
-        if($don){ 
-
-            $headers = [
-                "content-type" => "Application/json",
-                "cache-control" => "public, max-age=1000"
-            ];
-            
-            return $this->json($don, 200 ,  $headers , ['groups' => 'get:infoDons']); 
-
-        }else{
-            return $this->json(['status' => 404 , 'message' => "Ressource non trouvé"]); 
-        }
+        try{
+            return $send->sendData(
+                $serializer->serialize($don,'json',['groups' => 'get:infoDons']), 
+                $links->getEntityLinks( $don->getId() , "GET" , $request->server->get('HTTP_HOST') , "dons"),
+                200,
+                "Ressource trouvée"
+            );  
+            }catch(TypeError $e){
+                return $send->sendData("", "",400,$e->getMessage());
+            }   
            
     }
 
     /**
      * @Route("/{id}/edit", name="dons_edit", methods={"PUT"})
      */
-    public function edit(Request $request, Dons $don, DonsRepository $donsRepository, UtilisateurRepository $userRepository, ValidatorInterface $validator , SerializerInterface $serializer): Response
+    public function edit(
+        Request $request,
+        DonsRepository $donsRepository, 
+        UtilisateurRepository $userRepository, 
+        ValidatorInterface $validator , 
+        SerializerInterface $serializer,
+        EntityLinks $links,
+        Dons $don,
+        SendDataController $send 
+    ): Response
     {
         
-        $headers = [
-            "content-type" => "Application/json",
-            "cache-control" => "public, max-age=1000"
-        ];
-
-        try {
+        try{
             $don->setMontant($request->get('montant'));
             $don->setMessage($request->get('message')); 
 
@@ -112,34 +137,50 @@ class DonsController extends AbstractController
             $don->setUser($user); 
 
             $errors = $validator->validate($don);
+            
             if (count($errors) > 0) {
-                return $this->json($errors , 400);
-            }else {
+                $errorTab = []; 
+
+                foreach ($errors as $error ) {
+                    $errorTab[] = $error->getMessage();
+                }
+
+                return $send->sendData("", "",400, $errorTab);
+
+            }else{
                 $em = $this->getDoctrine()->getManager(); 
                 $em->persist($don); 
                 $em->flush();
+         
+                return $send->sendData(
+                    $serializer->serialize($don,'json',['groups' => 'get:infoDons']), 
+                    $links->getEntityLinks( $don->getId() ,"PUT" , $request->server->get('HTTP_HOST') , "dons"),
+                    201,
+                    "Ressource mis à jour"
+                );
 
-                $json = $serializer->serialize($donsRepository->find($don->getId()), 'json', ['groups' => ['get:infoDons']]);
-                return $this->json(json_decode($json), 201, $headers); 
             }
-            
-        } catch (\Throwable $th) {
-            return $this->json($th->getMessage(), 400, $headers);
+
+        }catch(TypeError $e){
+           
+            return $send->sendData("", "",400,$e->getMessage());
         }
     }
 
     /**
      * @Route("/{id}", name="dons_delete", methods={"DELETE"})
      */
-    public function delete(Request $request, Dons $don): Response
+    public function delete(Request $request, Dons $don, SendDataController $send): Response
     {
-        $entityManager = $this->getDoctrine()->getManager();
-        $entityManager->remove($don);
-        $entityManager->flush();
+        try{
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->remove($don);
+            $entityManager->flush();
 
-        return $this->json([
-            "status" => 201,
-            "message" => "Ressource supprimé"
-        ]);
+            return $send->sendData("", "",201,"Ressource supprimée");
+
+        }catch(TypeError $e){
+            return $send->sendData("", "",400,$e->getMessage());
+        }
     }
 }

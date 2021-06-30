@@ -104,14 +104,6 @@ class Type
     }
 
 
-
-    public function __toString()
-    {
-        return $this->nom; 
-    }
-
-
-
    
     
 }
