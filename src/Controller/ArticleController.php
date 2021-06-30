@@ -2,20 +2,18 @@
 
 namespace App\Controller;
 
+use TypeError;
+use App\Entity\Article;
+use App\Services\EntityLinks;
+use App\Services\SendDataController;
 use App\Repository\ArticleRepository;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Repository\UtilisateurRepository;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
-use App\Services\SendDataController;
-use TypeError;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use App\Entity\Article;
-use App\Repository\UtilisateurRepository;
-use Exception;
-use App\Services\EntityLinks;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 
 /**
@@ -24,9 +22,6 @@ use App\Services\EntityLinks;
 
 class ArticleController extends AbstractController
 {
-
-
-
 
     /**
      * Afficher la liste des articles
