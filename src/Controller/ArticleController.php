@@ -128,17 +128,19 @@ class ArticleController extends AbstractController
         SendDataController $send,
         SerializerInterface $serializer,
         Request $request,
-        ArticleRepository $articleRepository,
+        Article $article,
         EntityLinks $links
     ): JsonResponse {
-
-        $article = $articleRepository->find($request->get('id'));
-        return $send->sendData(
-            $serializer->serialize($article, 'json', ['groups' => 'get:infoArticle']),
-            $links->getEntityLinks($article->getId(), "GET", $request->server->get('HTTP_HOST'), "article"),
-            ($article) ? 200 : 404,
-            ($article) ? "Article trouvée" : "Article non trouvée"
-        );
+        try {
+            return $send->sendData(
+                $serializer->serialize($article, 'json', ['groups' => 'get:infoArticle']),
+                $links->getEntityLinks($article->getId(), "GET", $request->server->get('HTTP_HOST'), "article"),
+                ($article) ? 200 : 404,
+                ($article) ? "Article trouvée" : "Article non trouvée"
+            );
+        } catch (TypeError $e) {
+            return $this->json($e->getMessage(), 400);
+        }
     }
 
 
