@@ -41,12 +41,16 @@ class Utilisateur
      * @Assert\NotBlank(
      * message = "Email requis"
      * )
+     * @Assert\Email(
+     *     message = "L'email '{{ value }}' n'est pas valide."
+     * )
      */
     private $email;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups("get:infoUtilisateur")
+     * @Groups("get:infoArticle")
      * @Assert\NotBlank(
      * message = "Pseudo requis"
      * )
