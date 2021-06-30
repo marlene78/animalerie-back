@@ -65,10 +65,6 @@ class TypeController extends AbstractController
 
             $type = new Type();
             $type->setNom($request->get('nom')); 
-<<<<<<< HEAD
-
-=======
->>>>>>> acc396f077ad5ad85b10245bb5b160c6d07529e7
             $errors = $validator->validate($type);
             
             if (count($errors) > 0) {
