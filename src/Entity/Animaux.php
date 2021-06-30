@@ -58,10 +58,12 @@ class Animaux
     private $prix;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Type::class, inversedBy="animauxes" , cascade={"persist", "remove"})
+     * @ORM\ManyToOne(targetEntity=Type::class)
      * @Groups("get:infoAnimaux")
      */
     private $type;
+
+
 
    
 
@@ -132,6 +134,7 @@ class Animaux
 
         return $this;
     }
+
 
    
 }

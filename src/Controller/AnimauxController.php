@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use TypeError;
 use App\Entity\Animaux;
+use App\Services\EntityLinks;
 use App\Repository\TypeRepository;
 use App\Services\SendDataController;
 use App\Repository\AnimauxRepository;
@@ -21,23 +22,34 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
  */
 class AnimauxController extends AbstractController
 {
+  
     /**
+     * Liste des animaux
      * @Route("/", name="animaux_index", methods={"GET"})
+     * @param AnimauxRepository $animauxRepository
+     * @param SendDataController $send
+     * @param SerializerInterface $serializer
+     * @param Request $request
+     * @return JsonResponse
      */
-    public function index(AnimauxRepository $animauxRepository , SendDataController $send ,  SerializerInterface $serializer):JsonResponse
+    public function index(
+        AnimauxRepository $animauxRepository , 
+        SendDataController $send ,  
+        SerializerInterface $serializer , 
+        Request $request):JsonResponse
     {
         try{
 
             if(count($animauxRepository->findAll()) > 0){
                 return $send->sendData(
                     $serializer->serialize($animauxRepository->findAll(),'json',['groups' => 'get:infoAnimaux']), 
-                    $this->getEntityLinks(),
+                    ["POST" => "".$request->server->get('HTTP_HOST')."/animaux/new"],
                     200,
                     "Ressources trouvées"
                 );
             }else{
 
-                return $send->sendData("", $this->getEntityLinks(),404,"Liste vide");
+                return $send->sendData("", "",404,"Liste vide");
             }
 
         }catch(TypeError $e){
@@ -52,10 +64,28 @@ class AnimauxController extends AbstractController
 
 
 
+   
     /**
+     * Créer un nouveau animal
      * @Route("/new", name="animaux_new", methods={"POST"})
+     * @param Request $request
+     * @param ValidatorInterface $validator
+     * @param TypeRepository $typeRepository
+     * @param SendDataController $send
+     * @param SerializerInterface $serializer
+     * @param EntityLinks $links
+     * @param AnimauxRepository $animauxRepository
+     * @return JsonResponse
      */
-    public function new(Request $request ,ValidatorInterface $validator , TypeRepository $typeRepository ,SendDataController $send ,  SerializerInterface $serializer ):JsonResponse
+    public function new(
+        Request $request ,
+        ValidatorInterface $validator , 
+        TypeRepository $typeRepository ,
+        SendDataController $send ,
+        SerializerInterface $serializer , 
+        EntityLinks $links,
+        AnimauxRepository $animauxRepository
+         ):JsonResponse
     {
         
         try{
@@ -67,14 +97,18 @@ class AnimauxController extends AbstractController
             $animaux->setPrix($request->get("prix"));
          
             $type = $typeRepository->findOneBy(['nom' => $request->get('type') ]); 
-            $type != null ? $type->addAnimaux($animaux) : "";
             $animaux->setType($type); 
 
             $errors = $validator->validate($animaux);
             
             if (count($errors) > 0) {
 
-                return $send->sendData("", "",400,$errors);
+                
+                foreach ($errors as $error ) {
+                    $errorTab[] = $error->getMessage();
+                }
+
+                return $send->sendData("", "",400, $errorTab);
 
             }else{
                 $em = $this->getDoctrine()->getManager(); 
@@ -82,10 +116,10 @@ class AnimauxController extends AbstractController
                 $em->flush();
 
                 return $send->sendData(
-                    $serializer->serialize($animaux,'json',['groups' => 'get:infoAnimaux']), 
-                    $this->getEntityLinks(),
-                    200,
-                    "Ressource mise à jour"
+                    $serializer->serialize($animauxRepository->find($animaux->getId()),'json',['groups' => 'get:infoAnimaux']), 
+                    $links->getEntityLinks( $animaux->getId() ,"POST" , $request->server->get('HTTP_HOST') , "animaux"),
+                    201,
+                    "Ressource crée"
                 );
 
             }
@@ -102,14 +136,22 @@ class AnimauxController extends AbstractController
 
 
 
+ 
     /**
+     * Affiche un animal en fonction de son ID
      * @Route("/{id}", name="animaux_show", methods={"GET"})
+     * @param animaux $animaux
+     * @param SendDataController $send
+     * @param SerializerInterface $serializer
+     * @param EntityLinks $links
+     * @param Request $request
+     * @return JsonResponse
      */
-    public function show(animaux $animaux , SendDataController $send ,  SerializerInterface $serializer ):JsonResponse
+    public function show(animaux $animaux , SendDataController $send ,  SerializerInterface $serializer , EntityLinks $links , Request $request ):JsonResponse
     { 
         return $send->sendData(
             $serializer->serialize($animaux,'json',['groups' => 'get:infoAnimaux']), 
-            $this->getEntityLinks(),
+            $links->getEntityLinks( $animaux->getId() , "GET" , $request->server->get('HTTP_HOST') , "animaux"),
             200,
             "Ressource trouvée"
         );       
@@ -119,10 +161,20 @@ class AnimauxController extends AbstractController
 
 
 
+  
     /**
+     * Éditer un animal en fonction de son ID
      * @Route("/{id}/edit", name="animaux_edit", methods={"PUT"})
+     * @param Request $request
+     * @param Animaux $animaux
+     * @param TypeRepository $typeRepository
+     * @param ValidatorInterface $validator
+     * @param SendDataController $send
+     * @param SerializerInterface $serializer
+     * @param EntityLinks $links
+     * @return JsonResponse
      */
-    public function edit(Request $request, Animaux $animaux , TypeRepository $typeRepository , ValidatorInterface $validator , SendDataController $send ,  SerializerInterface $serializer):JsonResponse
+    public function edit(Request $request, Animaux $animaux , TypeRepository $typeRepository , ValidatorInterface $validator , SendDataController $send ,  SerializerInterface $serializer , EntityLinks $links ):JsonResponse
     {
 
         try{
@@ -133,20 +185,19 @@ class AnimauxController extends AbstractController
          
             $type = $typeRepository->findOneBy(['nom' => $request->get('type') ]); 
         
-            if($animaux->getType()!= null && $type != null){
-               $animaux->getType()->removeAnimaux($animaux); // old type
-            }
-
             $animaux->setType($type); 
-            $type != null ? $type->addAnimaux($animaux) : "";
-            
+           
 
             $errors = $validator->validate($animaux);
             
         
             if (count($errors) > 0) {
  
-                return $send->sendData("", "",400,$errors);
+                foreach ($errors as $error ) {
+                    $errorTab[] = $error->getMessage();
+                }
+
+                return $send->sendData("", "",400, $errorTab);
 
             }else{
 
@@ -155,8 +206,8 @@ class AnimauxController extends AbstractController
         
                 return $send->sendData(
                     $serializer->serialize($animaux,'json',['groups' => 'get:infoAnimaux']), 
-                    $this->getEntityLinks(),
-                    200,
+                    $links->getEntityLinks( $animaux->getId() , "PUT" , $request->server->get('HTTP_HOST') , 'animaux'),
+                    201,
                     "Ressource mise à jour"
                 );
         
@@ -178,24 +229,23 @@ class AnimauxController extends AbstractController
 
 
 
+  
     /**
+     * Supprimer un animal en fonction de son ID
      * @Route("/{id}", name="animaux_delete", methods={"DELETE"})
+     * @param Animaux $animaux
+     * @param SendDataController $send
+     * @return JsonResponse
      */
     public function delete(Animaux $animaux , SendDataController $send ): JsonResponse
     {
         try{
     
             $entityManager = $this->getDoctrine()->getManager();
-
-            if($animaux->getType() != null){
-                $type = $animaux->getType(); 
-                $type->removeAnimaux($animaux);
-            }
-
             $entityManager->remove($animaux);
             $entityManager->flush();
 
-            return $send->sendData("", $this->getEntityLinks(),201,"Ressource supprimée");
+            return $send->sendData("", "",201,"Ressource supprimée");
 
         }catch(TypeError $e){
             return $send->sendData("", "",400,$e->getMessage());
@@ -208,20 +258,6 @@ class AnimauxController extends AbstractController
 
 
 
-
-    /**
-     * Renvoi la liste des links
-     * @return array
-     */
-    public function getEntityLinks (){
-        return[
-            "GET" => "localhost:5000/animaux",
-            "GET" => "localhost:5000/animaux/{id}/",
-            "POST" => "localhost:5000/animaux/new",
-            "PUT" => "localhost:5000/animaux/{id}/edit",
-            "DELETE" => "localhost:5000/animaux/{id}"
-        ];
-    }
 
 
 
