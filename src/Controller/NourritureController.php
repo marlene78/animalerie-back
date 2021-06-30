@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use TypeError;
 use App\Entity\Nourriture;
+use App\Services\EntityLinks;
 use App\Repository\TypeRepository;
 use App\Services\SendDataController;
 use App\Repository\NourritureRepository;
@@ -21,22 +22,34 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
  */
 class NourritureController extends AbstractController
 {
+    
     /**
+     * Affiche la liste des nourritures
      * @Route("/", name="nourriture_index", methods={"GET"})
+     * @param NourritureRepository $nourritureRepository
+     * @param SendDataController $send
+     * @param SerializerInterface $serializer
+     * @param Request $request
+     * @return JsonResponse
      */
-    public function index(NourritureRepository $nourritureRepository , SendDataController $send ,  SerializerInterface $serializer):JsonResponse
+    public function index(
+        NourritureRepository $nourritureRepository , 
+        SendDataController $send ,  
+        SerializerInterface $serializer , 
+        Request $request
+        ):JsonResponse
     {
         try{
 
             if(count($nourritureRepository->findAll()) > 0){
                 return $send->sendData(
                     $serializer->serialize($nourritureRepository->findAll(),'json',['groups' => 'get:infoFood']), 
-                    $this->getEntityLinks(),
+                    ["POST" => "".$request->server->get('HTTP_HOST')."/nourriture/new"],
                     200,
                     "Ressources trouvées"
                 );
             }else{
-                return $send->sendData("", $this->getEntityLinks(),404,"Liste vide");
+                return $send->sendData("", "",404,"Liste vide");
             }
 
         }catch(TypeError $e){
@@ -51,10 +64,28 @@ class NourritureController extends AbstractController
 
 
 
+  
     /**
+     * Création d'une nourriture
      * @Route("/new", name="nourriture_new", methods={"POST"})
+     * @param Request $request
+     * @param ValidatorInterface $validator
+     * @param TypeRepository $typeRepository
+     * @param SendDataController $send
+     * @param SerializerInterface $serializer
+     * @param EntityLinks $links
+     * @return JsonResponse
      */
-    public function new(Request $request ,ValidatorInterface $validator , TypeRepository $typeRepository ,SendDataController $send ,  SerializerInterface $serializer ):JsonResponse
+    public function new(
+        Request $request ,
+        ValidatorInterface $validator , 
+        TypeRepository $typeRepository ,
+        SendDataController $send ,  
+        SerializerInterface $serializer ,  
+        EntityLinks $links ,
+        NourritureRepository $nourritureRepository
+        
+        ):JsonResponse
     {
         
         try{
@@ -65,7 +96,6 @@ class NourritureController extends AbstractController
             $nourriture->setPrix($request->get('prix')); 
 
             $type = $typeRepository->findOneBy(['nom' => $request->get('type') ]); 
-            $type->addNourriture($nourriture);
             $nourriture->setType($type); 
 
 
@@ -87,10 +117,10 @@ class NourritureController extends AbstractController
                 $em->flush();
 
                 return $send->sendData(
-                    $serializer->serialize($nourriture,'json',['groups' => 'get:infoFood']), 
-                    $this->getEntityLinks(),
-                    200,
-                    "Ressource mise à jour"
+                    $serializer->serialize($nourritureRepository->find($nourriture->getId()),'json',['groups' => 'get:infoFood']), 
+                    $links->getEntityLinks( $nourriture->getId() ,"POST" , $request->server->get('HTTP_HOST') , "nourriture"),
+                    201,
+                    "Ressource crée"
                 );
 
             }
@@ -111,14 +141,23 @@ class NourritureController extends AbstractController
 
 
 
+  
     /**
+     * Affiche une nourriture en fonction de son ID
      * @Route("/{id}", name="nourriture_show", methods={"GET"})
+     * @param Nourriture $nourriture
+     * @param SendDataController $send
+     * @param SerializerInterface $serializer
+     * @param Request $request
+     * @param EntityLinks $links
+     * @return JsonResponse
      */
-    public function show(Nourriture $nourriture , SendDataController $send ,  SerializerInterface $serializer ):JsonResponse
+    public function show(Nourriture $nourriture , SendDataController $send ,  SerializerInterface $serializer , Request $request ,  EntityLinks $links ,  NourritureRepository $repo  ):JsonResponse
     { 
+    
         return $send->sendData(
             $serializer->serialize($nourriture,'json',['groups' => 'get:infoFood']), 
-            $this->getEntityLinks(),
+            $links->getEntityLinks( $nourriture->getId() , "GET" , $request->server->get('HTTP_HOST') , "nourriture"),
             200,
             "Ressource trouvée"
         );       
@@ -128,10 +167,27 @@ class NourritureController extends AbstractController
 
 
 
+   
     /**
+     * Édition d'une nourriture en fonction de son ID
      * @Route("/{id}/edit", name="nourriture_edit", methods={"PUT"})
+     * @param Request $request
+     * @param Nourriture $nourriture
+     * @param TypeRepository $typeRepository
+     * @param ValidatorInterface $validator
+     * @param SendDataController $send
+     * @param SerializerInterface $serializer
+     * @param EntityLinks $links
+     * @return JsonResponse
      */
-    public function edit(Request $request, Nourriture $nourriture , TypeRepository $typeRepository , ValidatorInterface $validator , SendDataController $send ,  SerializerInterface $serializer):JsonResponse
+    public function edit(
+        Request $request, 
+        Nourriture $nourriture , 
+        TypeRepository $typeRepository , 
+        ValidatorInterface $validator , 
+        SendDataController $send ,  
+        SerializerInterface $serializer , 
+        EntityLinks $links):JsonResponse
     {
 
         try{
@@ -140,8 +196,6 @@ class NourritureController extends AbstractController
             $nourriture->setPrix($request->get('prix')); 
 
             $type = $typeRepository->findOneBy(['nom' => $request->get('type') ]); 
-
-            $type->addNourriture($nourriture);
             $nourriture->setType($type); 
     
             $errors = $validator->validate($nourriture);
@@ -163,8 +217,8 @@ class NourritureController extends AbstractController
         
                 return $send->sendData(
                     $serializer->serialize($nourriture,'json',['groups' => 'get:infoFood']), 
-                    $this->getEntityLinks(),
-                    200,
+                    $links->getEntityLinks( $nourriture->getId() , "PUT" , $request->server->get('HTTP_HOST') , 'nourriture'),
+                    201,
                     "Ressource mise à jour"
                 );
         
@@ -186,23 +240,23 @@ class NourritureController extends AbstractController
 
 
 
+   
     /**
+     * Supprimer une nourriture en fonction de son ID
      * @Route("/{id}", name="nourriture_delete", methods={"DELETE"})
+     * @param Nourriture $nourriture
+     * @param SendDataController $send
+     * @return JsonResponse
      */
     public function delete(Nourriture $nourriture , SendDataController $send ): JsonResponse
     {
         try{
     
             $entityManager = $this->getDoctrine()->getManager();
-            if($nourriture->getType() != null){
-                $type = $nourriture->getType(); 
-                $type->removeNourriture($nourriture);
-            }
-
             $entityManager->remove($nourriture);
             $entityManager->flush();
 
-            return $send->sendData("", $this->getEntityLinks(),201,"Ressource supprimée");
+            return $send->sendData("", "",201,"Ressource supprimée");
 
         }catch(TypeError $e){
             return $send->sendData("", "",400,$e->getMessage());
@@ -215,20 +269,6 @@ class NourritureController extends AbstractController
 
 
 
-
-    /**
-     * Renvoi la liste des links
-     * @return array
-     */
-    public function getEntityLinks (){
-        return[
-            "GET" => "localhost:5000/nourriture",
-            "GET" => "localhost:5000/nourriture/{id}/",
-            "POST" => "localhost:5000/nourriture/new",
-            "PUT" => "localhost:5000/nourriture/{id}/edit",
-            "DELETE" => "localhost:5000/nourriture/{id}",
-        ];
-    }
 
 
 
