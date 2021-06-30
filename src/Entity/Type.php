@@ -51,7 +51,10 @@ class Type
         $this->nourritures = new ArrayCollection();
         $this->accessoires = new ArrayCollection();
     }
-
+    public function __toString()
+    {
+        return $this->nom;
+    }
     public function getId(): ?int
     {
         return $this->id;

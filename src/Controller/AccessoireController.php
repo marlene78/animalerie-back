@@ -4,11 +4,14 @@ namespace App\Controller;
 
 use App\Entity\Accessoire;
 use App\Form\AccessoireType;
+use App\Repository\TypeRepository;
 use App\Repository\AccessoireRepository;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
  * @Route("/accessoire")
@@ -20,75 +23,130 @@ class AccessoireController extends AbstractController
      */
     public function index(AccessoireRepository $accessoireRepository): Response
     {
-        return $this->render('accessoire/index.html.twig', [
-            'accessoires' => $accessoireRepository->findAll(),
-        ]);
+        $headers = [
+            "content-type" => "Application/json",
+            "cache-control" => "public, max-age=1000"
+        ];
+        if (count($accessoireRepository->findAll()) > 0) {
+            return $this->json($accessoireRepository->findAll(), 200 ,  $headers , ['groups' => 'get:infoAccessoire']); 
+        }else{
+            return $this->json(['status' => 404 , 'message' => 'Liste vide']); 
+        }
+
     }
 
     /**
-     * @Route("/new", name="accessoire_new", methods={"GET","POST"})
+     * @Route("/new", name="accessoire_new", methods={"POST"})
      */
-    public function new(Request $request): Response
+    public function new(Request $request,AccessoireRepository $accessoireRepository, ValidatorInterface $validator , SerializerInterface $serializer,TypeRepository $typeRepository): Response
     {
         $accessoire = new Accessoire();
-        $form = $this->createForm(AccessoireType::class, $accessoire);
-        $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->persist($accessoire);
-            $entityManager->flush();
+        $headers = [
+            "content-type" => "Application/json",
+            "cache-control" => "public, max-age=1000"
+        ];
 
-            return $this->redirectToRoute('accessoire_index');
+        try {
+            $accessoire->setNom($request->get('nom'));
+            $accessoire->setPrix($request->get('prix')); 
+
+            $type = $typeRepository->findOneBy(['nom' => $request->get('type') ]); 
+            $accessoire->setType($type); 
+
+            $errors = $validator->validate($accessoire);
+            if (count($errors) > 0) {
+                return $this->json($errors , 400);
+            }else {
+                $em = $this->getDoctrine()->getManager(); 
+                $em->persist($accessoire); 
+                $em->flush();
+
+                $json = $serializer->serialize($accessoireRepository->find($accessoire->getId()), 'json', ['groups' => ['get:infoAccessoire']]);
+                return $this->json(json_decode($json), 201, $headers); 
+            }
+            
+        } catch (\Throwable $th) {
+            return $this->json($th->getMessage(), 400, $headers);
         }
 
-        return $this->render('accessoire/new.html.twig', [
-            'accessoire' => $accessoire,
-            'form' => $form->createView(),
-        ]);
+        
     }
 
     /**
      * @Route("/{id}", name="accessoire_show", methods={"GET"})
      */
-    public function show(Accessoire $accessoire): Response
+    public function show(Accessoire $accessoire,Request $request,  AccessoireRepository $accessoireRepository): Response
     {
-        return $this->render('accessoire/show.html.twig', [
-            'accessoire' => $accessoire,
-        ]);
-    }
+        $accessoire = $accessoireRepository->find($request->get("id"));
+        if($accessoire){ 
 
-    /**
-     * @Route("/{id}/edit", name="accessoire_edit", methods={"GET","POST"})
-     */
-    public function edit(Request $request, Accessoire $accessoire): Response
-    {
-        $form = $this->createForm(AccessoireType::class, $accessoire);
-        $form->handleRequest($request);
+            $headers = [
+                "content-type" => "Application/json",
+                "cache-control" => "public, max-age=1000"
+            ];
+            
+            return $this->json($accessoire, 200 ,  $headers , ['groups' => 'get:infoAccessoire']); 
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
-
-            return $this->redirectToRoute('accessoire_index');
+        }else{
+            return $this->json(['status' => 404 , 'message' => "Ressource non trouvé"]); 
         }
-
-        return $this->render('accessoire/edit.html.twig', [
-            'accessoire' => $accessoire,
-            'form' => $form->createView(),
-        ]);
+             
+         
+        
     }
 
     /**
-     * @Route("/{id}", name="accessoire_delete", methods={"POST"})
+     * @Route("/{id}/edit", name="accessoire_edit", methods={"PUT"})
+     */
+    public function edit(Request $request, AccessoireRepository $accessoireRepository, SerializerInterface $serializer, ValidatorInterface $validator, Accessoire $accessoire, TypeRepository $typeRepository): Response
+    {
+        try{
+            $headers = [
+                "content-type" => "Application/json",
+                "cache-control" => "public, max-age=1000"
+            ];
+    
+            $accessoire->setNom($request->get('nom'));
+            $accessoire->setPrix($request->get('prix')); 
+
+            $type = $typeRepository->findOneBy(['nom' => $request->get('type') ]); 
+            $accessoire->setType($type); 
+
+            $errors = $validator->validate($accessoire);
+            
+
+            if (count($errors) > 0) {
+        
+                return $this->json($errors , 400);
+            
+
+            }else{
+                $em = $this->getDoctrine()->getManager(); 
+                $em->persist($accessoire); 
+                $json = $serializer->serialize($accessoireRepository->find($accessoire->getId()), 'json', ['groups' => ['get:infoAccessoire']]);
+                return $this->json(json_decode($json), 201, $headers); 
+            }
+
+        }catch(TypeError $e){
+            return $this->json($e->getMessage() , 400);
+        }
+      
+    }
+
+    /**
+     * @Route("/{id}", name="accessoire_delete", methods={"DELETE"})
      */
     public function delete(Request $request, Accessoire $accessoire): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$accessoire->getId(), $request->request->get('_token'))) {
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->remove($accessoire);
-            $entityManager->flush();
-        }
+        
+        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->remove($accessoire);
+        $entityManager->flush();
 
-        return $this->redirectToRoute('accessoire_index');
+        return $this->json([
+            "status" => 201,
+            "message" => "accessoire supprimé"
+        ]); 
     }
 }

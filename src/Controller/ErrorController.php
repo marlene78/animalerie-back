@@ -12,8 +12,7 @@ class ErrorController {
     public function show(Exception $exception){
         return new JsonResponse([
             'message' => $exception->getMessage(),
-            'statutCode' => 404,
-        ] , 404);
+        ]);
     }
 
 }
