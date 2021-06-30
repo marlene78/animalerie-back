@@ -2,8 +2,10 @@
 
 namespace App\Entity;
 
-use App\Repository\DonsRepository;
+use App\Entity\Utilisateur;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\DonsRepository;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=DonsRepository::class)
@@ -14,22 +16,26 @@ class Dons
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups("get:infoDons")
      */
     private $id;
 
     /**
      * @ORM\Column(type="float")
+     * @Groups("get:infoDons")
      */
     private $montant;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups("get:infoDons")
      */
     private $message;
 
     /**
      * @ORM\ManyToOne(targetEntity=Utilisateur::class, inversedBy="dons")
      * @ORM\JoinColumn(nullable=false)
+     * @Groups("get:infoDons")
      */
     private $user;
 
@@ -62,12 +68,12 @@ class Dons
         return $this;
     }
 
-    public function getUser(): ?Utilisateur
+    public function getUser(): ?string
     {
         return $this->user;
     }
 
-    public function setUser(?Utilisateur $user): self
+    public function setUser($user): self
     {
         $this->user = $user;
 
