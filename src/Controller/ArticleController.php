@@ -22,7 +22,15 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class ArticleController extends AbstractController
 {
-
+    function checkIfUserIsEditeur($roles): bool
+    {
+        foreach ($roles as $role) {
+            if ($role->getNom() === "editeur") {
+                return true;
+            }
+        }
+        return false;
+    }
     /**
      * Afficher la liste des articles
      * @Route("/", name="article_index", methods={"GET"})
@@ -73,14 +81,21 @@ class ArticleController extends AbstractController
         SendDataController $send,
         SerializerInterface $serializer,
         UtilisateurRepository $utilisateurRepository,
-        EntityLinks $links
+        EntityLinks $links,
     ): JsonResponse {
+
+
         try {
-            if (!$request->get("auteur_id") || !$request->get("titre") || !$request->get("contenu")) {
+            if (!$request->get("user_id") || !$request->get("titre") || !$request->get("contenu")) {
                 return $send->sendData("", "", 400, "Paramètre manquant");
             }
+            $utilisateur = $utilisateurRepository->find($request->get('user_id'));
+
+            if (!$this->checkIfUserIsEditeur($utilisateur->getRole())) {
+                return $send->sendData("", "", 400, "L'utilisateur n'est pas un auteur");
+            }
             $article = new Article();
-            $article->setAuteur($utilisateurRepository->find($request->get("auteur_id")));
+            $article->setAuteur($utilisateurRepository->find($request->get("user_id")));
             $article->setTitre($request->get("titre"));
             $article->setContenu($request->get("contenu"));
             $errors = $validator->validate($article);
@@ -164,15 +179,24 @@ class ArticleController extends AbstractController
         ValidatorInterface $validator,
         SendDataController $send,
         SerializerInterface $serializer,
-        EntityLinks $links
+        EntityLinks $links,
+        UtilisateurRepository $utilisateurRepository
     ): JsonResponse {
 
         try {
 
 
 
-            if (!$request->get('contenu') &&  !$request->get('titre')) {
+            if (!$request->get('contenu') &&  !$request->get('titre') || !$request->get('user_id')) {
                 return $send->sendData("", "", 400, "Paramètre manquant");
+            }
+            if ($request->get('user_id') != $article->getAuteur()->getId()) {
+                return $send->sendData("", "", 400, "Utilisateur n'est pas l'auteur de l'article");
+            }
+            $utilisateur = $utilisateurRepository->find($request->get('user_id'));
+
+            if (!$this->checkIfUserIsEditeur($utilisateur->getRole())) {
+                return $send->sendData("", "", 400, "L'utilisateur n'est pas un auteur");
             }
 
             $article->setContenu(($request->get('contenu') ? $request->get('contenu') : $article->getContenu()));
