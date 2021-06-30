@@ -51,7 +51,9 @@ class UserController extends AbstractController
             if ($request->get('adresse')) {
                 $utilisateur->setAdresse($request->get('adresse'));
             }
-            $utilisateur->addRole($roleRepository->findOneBy(["nom" => $request->get('role')]));
+            foreach ($request->get('role') as $role) {
+                $utilisateur->addRole($roleRepository->findOneBy(["nom" => $role]));
+            }
 
             $errors = $validator->validate($utilisateur);
 
@@ -172,6 +174,7 @@ class UserController extends AbstractController
      * @param SendDataController $send,  
      * @param SerializerInterface $serializer, 
      * @param EntityLinks $links
+     * @param RoleRepository $roleRepository
      * @return JsonResponse
      */
     public function edit(
@@ -180,14 +183,15 @@ class UserController extends AbstractController
         ValidatorInterface $validator,
         SendDataController $send,
         SerializerInterface $serializer,
-        EntityLinks $links
+        EntityLinks $links,
+        RoleRepository $roleRepository
     ): JsonResponse {
 
         try {
 
 
 
-            if (!$request->get('pseudo')  && !$request->get('motDePasse') && !$request->get('email') && !$request->get('adresse')) {
+            if (!$request->get('pseudo')  && !$request->get('motDePasse') && !$request->get('email') && !$request->get('adresse') && !$request->get('role')) {
                 return $send->sendData("", "", 400, "Paramètre manquant");
             }
             if ($request->get('pseudo') || $request->get('email')) {
@@ -223,6 +227,14 @@ class UserController extends AbstractController
                     return $send->sendData("", "", 400, "Adresse ne peut etre vide.");
                 }
                 $utilisateur->setAdresse($request->get('adresse'));
+            }
+            if ($request->get('role')) {
+                foreach ($utilisateur->getRole() as $role) {
+                    $utilisateur->removeRole($role);
+                }
+                foreach ($request->get('role') as $role) {
+                    $utilisateur->addRole($roleRepository->findOneBy(["nom" => $role]));
+                }
             }
 
             $em = $this->getDoctrine()->getManager();

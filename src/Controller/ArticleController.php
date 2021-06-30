@@ -81,7 +81,7 @@ class ArticleController extends AbstractController
         SendDataController $send,
         SerializerInterface $serializer,
         UtilisateurRepository $utilisateurRepository,
-        EntityLinks $links,
+        EntityLinks $links
     ): JsonResponse {
 
 
