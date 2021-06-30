@@ -39,6 +39,9 @@ class Accessoire
     private $type;
 
 
+    
+
+
     public function getId(): ?int
     {
         return $this->id;
