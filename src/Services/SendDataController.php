@@ -45,11 +45,4 @@ class SendDataController
 
 
 
-
-    public function getLinks(){
-
-    }
-
-
-
 }
