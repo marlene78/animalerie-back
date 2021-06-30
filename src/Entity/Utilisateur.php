@@ -85,6 +85,10 @@ class Utilisateur
         $this->articles = new ArrayCollection();
         $this->dons = new ArrayCollection();
     }
+    public function __toString()
+    {
+        return (string) $this->id;
+    }
 
     public function getId(): ?int
     {
