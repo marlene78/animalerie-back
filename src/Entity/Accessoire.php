@@ -5,6 +5,8 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\AccessoireRepository;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ORM\Entity(repositoryClass=AccessoireRepository::class)
@@ -22,12 +24,17 @@ class Accessoire
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups("get:infoAccessoire")
+     * @Assert\NotBlank(
+     * message = "Veuillez saisir un nom"
+     * )
      */
     private $nom;
 
     /**
      * @ORM\Column(type="float")
      * @Groups("get:infoAccessoire")
+     * @Assert\NotBlank(message = "Veuillez saisir un prix")
+     * @Assert\Type(type="float",message="Veuillez saisir un nombre")
      */
     private $prix;
 
