@@ -79,7 +79,7 @@ class UserController extends AbstractController
                 "Utilisateur ajouté"
             );
         } catch (TypeError $e) {
-            return $this->json($e->getMessage(), 400);
+            return $send->sendData("", "", 400, $e->getMessage());
         }
     }
 
