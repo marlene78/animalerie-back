@@ -37,7 +37,10 @@ class SendDataController
             [
                 "content-type" => "Application/json",
                 "cache-control"  => $cache,
-                "HTTP/1.0 ".$statusCode.""
+                "HTTP/1.0 ".$statusCode."",
+                "Access-Control-Allow-Origin: *",
+                "Access-Control-Allow-Headers: *",
+                "Access-Control-Allow-Methods: *",
             ],
             false
         );

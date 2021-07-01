@@ -63,6 +63,45 @@ class AnimauxController extends AbstractController
 
 
 
+    /**
+     * Liste des 5 derniers animaux
+     * @Route("/last", name="animaux_last", methods={"GET"})
+     * @param AnimauxRepository $animauxRepository
+     * @param SendDataController $send
+     * @param SerializerInterface $serializer
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getLast(
+        AnimauxRepository $animauxRepository , 
+        SendDataController $send ,  
+        SerializerInterface $serializer , 
+        Request $request):JsonResponse
+    {
+        try{
+
+            if(count($animauxRepository->findLast()) > 0){
+                return $send->sendData(
+                    $serializer->serialize($animauxRepository->findLast(),'json',['groups' => 'get:infoAnimaux']), 
+                    ["POST" => "".$request->server->get('HTTP_HOST')."/animaux/new"],
+                    200,
+                    "Ressources trouvées"
+                );
+            }else{
+
+                return $send->sendData("", "",404,"Liste vide");
+            }
+
+        }catch(TypeError $e){
+
+            return $send->sendData("", "",400,$e->getMessage());
+        }
+     
+    
+    }
+
+
+
 
    
     /**
@@ -262,3 +301,6 @@ class AnimauxController extends AbstractController
 
 
 }
+
+
+
