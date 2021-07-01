@@ -189,8 +189,8 @@ class NourritureController extends AbstractController
         SerializerInterface $serializer , 
         EntityLinks $links):JsonResponse
     {
-
         try{
+            
             $nourriture->setNom($request->get('nom')); 
             $nourriture->setDescription($request->get('description')); 
             $nourriture->setPrix($request->get('prix')); 
@@ -226,7 +226,7 @@ class NourritureController extends AbstractController
             }
         }catch(TypeError $e){
 
-            return $send->sendData("", "",404,$e->getMessage());
+            return $send->sendData("", "",404, $e->getMessage());
         }
 
 
