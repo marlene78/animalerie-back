@@ -29,7 +29,7 @@ class SendDataController
       
    
         
-        $cache = $statusCode != 200  ? "no-cache" : "public, max-age=1000"; 
+        $cache = $statusCode != 201  ? "no-cache" : "public, max-age=1000"; 
     
         return new JsonResponse(
             $dataFormat,

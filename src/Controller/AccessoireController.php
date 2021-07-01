@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use TypeError;
 use App\Entity\Accessoire;
 use App\Form\AccessoireType;
 use App\Services\EntityLinks;
