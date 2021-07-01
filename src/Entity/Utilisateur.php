@@ -41,12 +41,16 @@ class Utilisateur
      * @Assert\NotBlank(
      * message = "Email requis"
      * )
+     * @Assert\Email(
+     *     message = "L'email '{{ value }}' n'est pas valide."
+     * )
      */
     private $email;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups("get:infoUtilisateur")
+     * @Groups("get:infoArticle")
      * @Assert\NotBlank(
      * message = "Pseudo requis"
      * )
@@ -80,6 +84,10 @@ class Utilisateur
         $this->role = new ArrayCollection();
         $this->articles = new ArrayCollection();
         $this->dons = new ArrayCollection();
+    }
+    public function __toString()
+    {
+        return (string) $this->id;
     }
 
     public function getId(): ?int
