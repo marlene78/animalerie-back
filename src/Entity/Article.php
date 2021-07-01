@@ -4,9 +4,14 @@ namespace App\Entity;
 
 use App\Repository\ArticleRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
 
 /**
  * @ORM\Entity(repositoryClass=ArticleRepository::class)
+ * @UniqueEntity("titre")
  */
 class Article
 {
@@ -14,20 +19,26 @@ class Article
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups("get:infoArticle")
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups("get:infoArticle")
+     * @Assert\NotBlank(message = "Titre requis")
      */
     private $titre;
 
     /**
      * @ORM\Column(type="text")
+     * @Groups("get:infoArticle")
+     * @Assert\NotBlank(message = "Contenu requis")
      */
     private $contenu;
 
     /**
+     * @Groups("get:infoArticle")
      * @ORM\ManyToOne(targetEntity=Utilisateur::class, inversedBy="articles")
      */
     private $auteur;
