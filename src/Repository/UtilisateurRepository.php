@@ -19,7 +19,7 @@ class UtilisateurRepository extends ServiceEntityRepository
         parent::__construct($registry, Utilisateur::class);
     }
 
-<<<<<<< HEAD
+
     // /**
     //  * @return Utilisateur[] Returns an array of Utilisateur objects
     //  */
@@ -48,18 +48,19 @@ class UtilisateurRepository extends ServiceEntityRepository
         ;
     }
     */
-=======
+
+
     public function findByRoled($value , $role) //$value = id
- {
- return $this->createQueryBuilder('u') 
- ->andWhere('u.id = :val') 
- ->setParameter('val', $value)
- ->andWhere('u.role = :role')
- ->setParameter('role', $role)
- ->orderBy('u.id', 'ASC')
- ->getQuery()
- ->getResult()
- ;
-}
->>>>>>> e170235e7f4ebb6c0bb592bbceadc03ecbfa5da6
+    {
+    return $this->createQueryBuilder('u') 
+    ->andWhere('u.id = :val') 
+    ->setParameter('val', $value)
+    ->andWhere('u.role = :role')
+    ->setParameter('role', $role)
+    ->orderBy('u.id', 'ASC')
+    ->getQuery()
+    ->getResult()
+    ;
+    }
+
 }
