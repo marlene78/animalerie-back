@@ -86,7 +86,7 @@ class ArticleController extends AbstractController
 
 
         try {
-            if (!$request->get("user_id") || !$request->get("titre") || !$request->get("contenu")) {
+            if (!$request->get("user_id") && !$request->get("titre") && !$request->get("contenu")) {
                 return $send->sendData("", "", 400, "Paramètre manquant");
             }
             $utilisateur = $utilisateurRepository->find($request->get('user_id'));

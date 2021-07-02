@@ -29,7 +29,7 @@ class SendDataController
       
    
         
-        $cache = $statusCode != 200  ? "no-cache" : "public, max-age=1000"; 
+        $cache = $statusCode != 201  ? "no-cache" : "public, max-age=1000"; 
     
         return new JsonResponse(
             $dataFormat,
@@ -37,7 +37,10 @@ class SendDataController
             [
                 "content-type" => "Application/json",
                 "cache-control"  => $cache,
-                "HTTP/1.0 ".$statusCode.""
+                "HTTP/1.0 ".$statusCode."",
+                "Access-Control-Allow-Origin: *",
+                "Access-Control-Allow-Headers: *",
+                "Access-Control-Allow-Methods: *",
             ],
             false
         );
