@@ -5,9 +5,12 @@ namespace App\Controller;
 use TypeError;
 use App\Entity\Nourriture;
 use App\Services\EntityLinks;
+use Swagger\Annotations as SWG;
 use App\Repository\TypeRepository;
 use App\Services\SendDataController;
 use App\Repository\NourritureRepository;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -16,9 +19,8 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 
-
 /**
- * @Route("/nourriture")
+ * @Route("/api/nourriture")
  */
 class NourritureController extends AbstractController
 {
@@ -26,6 +28,11 @@ class NourritureController extends AbstractController
     /**
      * Affiche la liste des nourritures
      * @Route("/", name="nourriture_index", methods={"GET"})
+     * @SWG\Response(
+     *     description="Retourne la liste des nourritures",
+     *     response=200,
+     *    @Model(type=Nourriture::class , groups={"get:infoFood"})
+     * )
      * @param NourritureRepository $nourritureRepository
      * @param SendDataController $send
      * @param SerializerInterface $serializer
@@ -68,6 +75,36 @@ class NourritureController extends AbstractController
     /**
      * Création d'une nourriture
      * @Route("/new", name="nourriture_new", methods={"POST"})
+     *  @SWG\Response(
+     *     description="Création d'une nourriture",
+     *     response=201,
+     *    @Model(type=Nourriture::class , groups={"get:infoFood"})
+     * )
+     *  @SWG\Parameter(
+     *     name="nom",
+     *     in="query",
+     *     type="string",
+     *     description="Nom du produit",
+     * )
+     *  @SWG\Parameter(
+     *     name="description",
+     *     in="query",
+     *     type="string",
+     *     description="Description du produit"
+     * )
+     *  @SWG\Parameter(
+     *     name="prix",
+     *     in="query",
+     *     type="number",
+     *     description="Prix"
+     * )
+     *  @SWG\Parameter(
+     *     name="type",
+     *     in="query",
+     *     type="string",
+     *     description="Type d'animal"
+     * )
+     * @Security(name="Bearer")
      * @param Request $request
      * @param ValidatorInterface $validator
      * @param TypeRepository $typeRepository
@@ -145,6 +182,11 @@ class NourritureController extends AbstractController
     /**
      * Affiche une nourriture en fonction de son ID
      * @Route("/{id}", name="nourriture_show", methods={"GET"})
+     *  @SWG\Response(
+     *     description="Retourne une nourriture par son ID",
+     *     response=200,
+     *    @Model(type=Nourriture::class , groups={"get:infoFood"})
+     * )
      * @param Nourriture $nourriture
      * @param SendDataController $send
      * @param SerializerInterface $serializer
@@ -171,6 +213,36 @@ class NourritureController extends AbstractController
     /**
      * Édition d'une nourriture en fonction de son ID
      * @Route("/{id}/edit", name="nourriture_edit", methods={"PUT"})
+     *  @SWG\Response(
+     *     description="Édition d'une nourriture",
+     *     response=201,
+     *    @Model(type=Nourriture::class , groups={"get:infoFood"})
+     * )
+     *  @SWG\Parameter(
+     *     name="nom",
+     *     in="query",
+     *     type="string",
+     *     description="Nom du produit",
+     * )
+     *  @SWG\Parameter(
+     *     name="description",
+     *     in="query",
+     *     type="string",
+     *     description="Description du produit"
+     * )
+     *  @SWG\Parameter(
+     *     name="prix",
+     *     in="query",
+     *     type="number",
+     *     description="Prix"
+     * )
+     *  @SWG\Parameter(
+     *     name="type",
+     *     in="query",
+     *     type="string",
+     *     description="Type d'animal"
+     * )
+     * @Security(name="Bearer")
      * @param Request $request
      * @param Nourriture $nourriture
      * @param TypeRepository $typeRepository
@@ -244,6 +316,11 @@ class NourritureController extends AbstractController
     /**
      * Supprimer une nourriture en fonction de son ID
      * @Route("/{id}", name="nourriture_delete", methods={"DELETE"})
+     * @SWG\Response(
+     *     description="Supprime une nourriture par son ID",
+     *     response=201,
+     * )
+     * @Security(name="Bearer")
      * @param Nourriture $nourriture
      * @param SendDataController $send
      * @return JsonResponse

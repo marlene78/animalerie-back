@@ -1,9 +1,22 @@
 nelmio_api_doc:
     documentation:
+        host: localhost:5000
+        schemes: [http, https]
         info:
-            title: My App
-            description: This is an awesome app!
+            title: Pet Shop
+            description: Api Site e-commerce
             version: 1.0.0
-    areas: # to filter documented areas
-        path_patterns:
-            - ^/api(?!/doc$) # Accepts routes under /api except /api/doc
+        securityDefinitions:
+            Bearer:
+                type: apiKey
+                description: 'Value: Bearer {jwt}'
+                name: Authorization
+                in: header
+    areas:
+        default:
+            path_patterns: [ ^/api ]
+    # areas: # to filter documented areas
+    #     path_patterns:
+    #         - ^/api(?!/doc$) # Accepts routes under /api except /api/doc
+    #     host_patterns:
+    #         - ^api\.
