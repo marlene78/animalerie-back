@@ -36,7 +36,11 @@ docker-compose up
 
 
 ## Sécurité
+JWT token qui sécurise toutes les pages POST, GET , PUT 
 
+
+## Gestion des erreurs 
+Création d'un controller qui renvoit un json 
 
 
 
