@@ -5,9 +5,12 @@ namespace App\Controller;
 use TypeError;
 use App\Entity\Article;
 use App\Services\EntityLinks;
+use Swagger\Annotations as SWG;
 use App\Services\SendDataController;
 use App\Repository\ArticleRepository;
 use App\Repository\UtilisateurRepository;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -16,8 +19,10 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 
+
+
 /**
- * @Route("/article")
+ * @Route("/api/article")
  */
 
 class ArticleController extends AbstractController
@@ -34,6 +39,11 @@ class ArticleController extends AbstractController
     /**
      * Afficher la liste des articles
      * @Route("/", name="article_index", methods={"GET"})
+     * @SWG\Response(
+     *     description="Retourne la liste des articles",
+     *     response=200,
+     *    @Model(type=Article::class , groups={"get:infoArticle"})
+     * )
      * @param ArticleRepository $articleRepository
      * @param SendDataController $send,  
      * @param SerializerInterface $serializer
@@ -67,6 +77,30 @@ class ArticleController extends AbstractController
     /**
      * Création d'un article
      * @Route("/new", name="article_new", methods={"POST"})
+     *  @SWG\Response(
+     *     description="Création d'un article",
+     *     response=201,
+     *    @Model(type=Article::class , groups={"get:infoArticle"})
+     * )
+     *  @SWG\Parameter(
+     *     name="titre",
+     *     in="query",
+     *     type="string",
+     *     description="titre de l'article",
+     * )
+     *  @SWG\Parameter(
+     *     name="contenu",
+     *     in="query",
+     *     type="string",
+     *     description="Contenu de l'article"
+     * )
+     *  @SWG\Parameter(
+     *     name="user_id",
+     *     in="query",
+     *     type="integer",
+     *     description="Identitifiant de l'utilisateur"
+     * )
+     * @Security(name="Bearer")
      * @param Request $request
      * @param ValidatorInterface $validator
      * @param SendDataController $send
@@ -132,6 +166,11 @@ class ArticleController extends AbstractController
     /**
      * Affichage d'un article suivant son id 
      * @Route("/{id}", name="article_show", methods={"GET"})
+     *   @SWG\Response(
+     *     description="Retourne un article par son ID",
+     *     response=200,
+     *    @Model(type=Article::class , groups={"get:infoArticle"})
+     * )
      * @param SendDataController $send 
      * @param SerializerInterface $serializer
      * @param Request $request
@@ -165,6 +204,31 @@ class ArticleController extends AbstractController
     /**
      * Edition d'un article en fonction de son ID
      * @Route("/{id}/edit", name="article_edit", methods={"PUT"})
+     *  @SWG\Response(
+     *     description="Édition d'un article",
+     *     response=201,
+     *    @Model(type=Article::class , groups={"get:infoArticle"})
+     * )
+     *  @SWG\Parameter(
+     *     name="titre",
+     *     in="query",
+     *     type="string",
+     *     description="titre de l'article",
+     * )
+     *  @SWG\Parameter(
+     *     name="contenu",
+     *     in="query",
+     *     type="string",
+     *     description="Contenu de l'article"
+     * )
+     *  @SWG\Parameter(
+     *     name="user_id",
+     *     in="query",
+     *     type="integer",
+     *     description="Identitifiant de l'utilisateur"
+     * )
+     * @Security(name="Bearer")
+     * 
      * @param Request $request, 
      * @param Article $article, 
      * @param ValidatorInterface $validator, 
@@ -240,6 +304,11 @@ class ArticleController extends AbstractController
     /**
      * Supprimer un article en fonction de son ID
      * @Route("/{id}", name="article_delete", methods={"DELETE"})
+     *   @SWG\Response(
+     *     description="Supprime un article par son ID",
+     *     response=201,
+     * )
+     * @Security(name="Bearer")
      * @param Article $article,
      * @param SendDataController $send
      * @return JsonResponse 

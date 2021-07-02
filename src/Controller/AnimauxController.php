@@ -5,9 +5,12 @@ namespace App\Controller;
 use TypeError;
 use App\Entity\Animaux;
 use App\Services\EntityLinks;
+use Swagger\Annotations as SWG;
 use App\Repository\TypeRepository;
 use App\Services\SendDataController;
 use App\Repository\AnimauxRepository;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -16,9 +19,8 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 
-
 /**
- * @Route("/animaux")
+ * @Route("/api/animaux")
  */
 class AnimauxController extends AbstractController
 {
@@ -26,6 +28,11 @@ class AnimauxController extends AbstractController
     /**
      * Liste des animaux
      * @Route("/", name="animaux_index", methods={"GET"})
+     * @SWG\Response(
+     *     description="Retourne la liste des animaux",
+     *     response=200,
+     *    @Model(type=Animaux::class , groups={"get:infoAnimaux"})
+     * )
      * @param AnimauxRepository $animauxRepository
      * @param SendDataController $send
      * @param SerializerInterface $serializer
@@ -81,6 +88,8 @@ class AnimauxController extends AbstractController
         try{
 
             if(count($animauxRepository->findLast()) > 0){
+
+
                 return $send->sendData(
                     $serializer->serialize($animauxRepository->findLast(),'json',['groups' => 'get:infoAnimaux']), 
                     ["POST" => "".$request->server->get('HTTP_HOST')."/animaux/new"],
@@ -107,6 +116,42 @@ class AnimauxController extends AbstractController
     /**
      * Créer un nouveau animal
      * @Route("/new", name="animaux_new", methods={"POST"})
+     *  @SWG\Response(
+     *     description="Création d'un animal",
+     *     response=201,
+     *    @Model(type=Animaux::class , groups={"get:infoAnimaux"})
+     * )
+     *  @SWG\Parameter(
+     *     name="race",
+     *     in="query",
+     *     type="string",
+     *     description="Race de l'animal",
+     * )
+     *  @SWG\Parameter(
+     *     name="poids",
+     *     in="query",
+     *     type="number",
+     *     description="Poids de l'animal"
+     * )
+     *  @SWG\Parameter(
+     *     name="age",
+     *     in="query",
+     *     type="number",
+     *     description="Âge de l'animal"
+     * )
+     *  @SWG\Parameter(
+     *     name="prix",
+     *     in="query",
+     *     type="number",
+     *     description="Prix à l'achat de l'animal"
+     * )
+     *  @SWG\Parameter(
+     *     name="type",
+     *     in="query",
+     *     type="string",
+     *     description="Type d'animal"
+     * )
+     * @Security(name="Bearer")
      * @param Request $request
      * @param ValidatorInterface $validator
      * @param TypeRepository $typeRepository
@@ -179,6 +224,11 @@ class AnimauxController extends AbstractController
     /**
      * Affiche un animal en fonction de son ID
      * @Route("/{id}", name="animaux_show", methods={"GET"})
+     *   @SWG\Response(
+     *     description="Retourne un animal par son ID",
+     *     response=200,
+     *    @Model(type=Animaux::class , groups={"get:infoAnimaux"})
+     * )
      * @param animaux $animaux
      * @param SendDataController $send
      * @param SerializerInterface $serializer
@@ -204,6 +254,42 @@ class AnimauxController extends AbstractController
     /**
      * Éditer un animal en fonction de son ID
      * @Route("/{id}/edit", name="animaux_edit", methods={"PUT"})
+     *  @SWG\Response(
+     *     description="Édition d'un animal",
+     *     response=201,
+     *    @Model(type=Animaux::class , groups={"get:infoAnimaux"})
+     * )
+     *  @SWG\Parameter(
+     *     name="race",
+     *     in="query",
+     *     type="string",
+     *     description="Race de l'animal",
+     * )
+     *  @SWG\Parameter(
+     *     name="poids",
+     *     in="query",
+     *     type="number",
+     *     description="Poids de l'animal"
+     * )
+     *  @SWG\Parameter(
+     *     name="age",
+     *     in="query",
+     *     type="number",
+     *     description="Âge de l'animal"
+     * )
+     *  @SWG\Parameter(
+     *     name="prix",
+     *     in="query",
+     *     type="number",
+     *     description="Prix à l'achat de l'animal"
+     * )
+     *  @SWG\Parameter(
+     *     name="type",
+     *     in="query",
+     *     type="string",
+     *     description="Type d'animal"
+     * )
+     * @Security(name="Bearer")
      * @param Request $request
      * @param Animaux $animaux
      * @param TypeRepository $typeRepository
@@ -272,6 +358,11 @@ class AnimauxController extends AbstractController
     /**
      * Supprimer un animal en fonction de son ID
      * @Route("/{id}", name="animaux_delete", methods={"DELETE"})
+     *   @SWG\Response(
+     *     description="Supprime un animal par son ID",
+     *     response=201,
+     * )
+     * @Security(name="Bearer")
      * @param Animaux $animaux
      * @param SendDataController $send
      * @return JsonResponse
