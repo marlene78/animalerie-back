@@ -23,7 +23,7 @@ class TokenSubscriber implements EventSubscriberInterface
     {
         $request= $event->getRequest();
         $uri = $request->getRequestUri();
-        if($request->getMethod() !== 'GET' && $uri !== '/login' && $uri !== '/user/new'){
+        if($request->getMethod() !== 'GET' && $uri !== 'api/login' && $uri !== 'api/user/new'){
             $authorization = $request->headers->get('authorization');
             if(!$authorization){
                 $event->setResponse($this->send->sendData("", "", 401, 'Require authentification'));
