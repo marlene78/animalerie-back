@@ -86,7 +86,8 @@ class UserController extends AbstractController
             if ($request->get('adresse')) {
                 $utilisateur->setAdresse($request->get('adresse'));
             }
-            foreach ($request->get('role') as $role) {
+            $roles = (is_array($request->get('role')) ? $request->get('role') : explode(',', $request->get('role')));
+            foreach ($roles as $role) {
                 $utilisateur->addRole($roleRepository->findOneBy(["nom" => $role]));
             }
 
