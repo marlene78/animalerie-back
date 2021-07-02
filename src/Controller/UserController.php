@@ -29,7 +29,7 @@ class UserController extends AbstractController
      * Création d'un utilisateur
      * @Route("/user/new", name="user_create", methods={"POST"})
      *  @SWG\Response(
-     *     description="Création d'une nourriture",
+     *     description="Création d'une utlisateur",
      *     response=201,
      *    @Model(type=Utilisateur::class , groups={"get:infoUtilisateur"})
      * )
@@ -234,7 +234,7 @@ class UserController extends AbstractController
     //  * Edition d'un utilisateur en fonction de son ID
     //  * @Route("user/{id}/edit", name="user_edit", methods={"PUT"})
     //  *  @SWG\Response(
-    //  *     description="Création d'une nourriture",
+    //  *     description="Édition d'un utilisateur",
     //  *     response=201,
     //  *    @Model(type=Utilisateur::class , groups={"get:infoUtilisateur"})
     //  * )

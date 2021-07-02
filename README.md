@@ -31,6 +31,8 @@ docker-compose up
 - Accédez à l'application : http://localhost:5000 
 
   
+# DATABASE
+- sql fournit
 
 
 ## Sécurité
