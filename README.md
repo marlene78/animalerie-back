@@ -33,6 +33,7 @@ docker-compose up
   
 # DATABASE
 - sql fournit
+- Créer deux rôles = admin et editeur
 
 
 ## Sécurité
