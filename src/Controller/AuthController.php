@@ -19,7 +19,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class AuthController extends AbstractController
 {
     /**
-     * @Route("/login", name="login", methods={"POST"})
+     * @Route("/api/login", name="login", methods={"POST"})
      */
     public function login(
         Request $request,

@@ -4,12 +4,15 @@ namespace App\Controller;
 
 use TypeError;
 use App\Entity\Type;
-use App\Repository\AccessoireRepository;
-use App\Repository\AnimauxRepository;
-use App\Repository\NourritureRepository;
-use App\Repository\TypeRepository;
 use App\Services\EntityLinks;
+use Swagger\Annotations as SWG;
+use App\Repository\TypeRepository;
 use App\Services\SendDataController;
+use App\Repository\AnimauxRepository;
+use App\Repository\AccessoireRepository;
+use App\Repository\NourritureRepository;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -19,15 +22,21 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 
 /**
- * @Route("/type")
+ * @Route("/api/type")
  */
 class TypeController extends AbstractController
 {
   
     
     /**
-     * Affiche la liste des types
+     * Liste des types
      * @Route("/", name="type_index", methods={"GET"})
+     * @SWG\Response(
+     *     description="Retourne la liste des types",
+     *     response=200,
+     *    @Model(type=Type::class , groups={"get:infoType"})
+     * )
+     * 
      * @param TypeRepository $typeRepository
      * @param SendDataController $send
      * @param SerializerInterface $serializer
@@ -70,6 +79,18 @@ class TypeController extends AbstractController
     /**
      * Création d'un nouveau type
      * @Route("/new", name="type_new", methods={"POST"})
+     *  @SWG\Response(
+     *     description="Création d'un type",
+     *     response=201,
+     *    @Model(type=Type::class , groups={"get:infoType"})
+     * )
+     *  @SWG\Parameter(
+     *     name="nom",
+     *     in="query",
+     *     type="string",
+     *     description="Nom du type",
+     * )
+     * @Security(name="Bearer")
      * @param Request $request
      * @param ValidatorInterface $validator
      * @param SendDataController $send
@@ -129,6 +150,11 @@ class TypeController extends AbstractController
     /**
      * Affiche un type en fonction de son ID
      * @Route("/{id}", name="type_show", methods={"GET"} )
+    *  @SWG\Response(
+     *     description="Retourne un type par son ID",
+     *     response=200,
+     *    @Model(type=Type::class , groups={"get:infoType"})
+     * )
      * @param Type $type
      * @param SendDataController $send
      * @param SerializerInterface $serializer
@@ -161,6 +187,18 @@ class TypeController extends AbstractController
     /**
      * Éditer un type en fonction de son ID
      * @Route("/{id}/edit", name="type_edit", methods={"PUT"})
+     *  @SWG\Response(
+     *     description="Création d'un type",
+     *     response=201,
+     *    @Model(type=Type::class , groups={"get:infoType"})
+     * )
+     *  @SWG\Parameter(
+     *     name="nom",
+     *     in="query",
+     *     type="string",
+     *     description="Nom du type",
+     * )
+     * @Security(name="Bearer")
      * @param Request $request
      * @param TypeRepository $typeRepository
      * @param ValidatorInterface $validator
@@ -221,6 +259,11 @@ class TypeController extends AbstractController
     /**
      * Supprimer un type en fonction de son ID
      * @Route("/{id}", name="type_delete", methods={"DELETE"})
+     * @SWG\Response(
+     *     description="Supprime un type par son ID",
+     *     response=201,
+     * )
+     * @Security(name="Bearer")
      * @param Type $type
      * @param SendDataController $send
      * @return JsonResponse

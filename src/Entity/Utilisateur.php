@@ -24,6 +24,7 @@ class Utilisateur
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups("get:infoDons")
      */
     private $id;
 
@@ -51,6 +52,7 @@ class Utilisateur
      * @ORM\Column(type="string", length=255)
      * @Groups("get:infoUtilisateur")
      * @Groups("get:infoArticle")
+     * @Groups("get:infoDons")
      * @Assert\NotBlank(
      * message = "Pseudo requis"
      * )
@@ -74,10 +76,15 @@ class Utilisateur
      */
     private $articles;
 
+
+
     /**
      * @ORM\OneToMany(targetEntity=Dons::class, mappedBy="user")
      */
     private $dons;
+
+
+
 
     public function __construct()
     {
@@ -85,11 +92,15 @@ class Utilisateur
         $this->articles = new ArrayCollection();
         $this->dons = new ArrayCollection();
     }
+
+
+
     public function __toString()
     {
         return (string) $this->id;
     }
 
+    
     public function getId(): ?int
     {
         return $this->id;

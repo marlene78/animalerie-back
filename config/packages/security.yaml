@@ -12,6 +12,7 @@ security:
             lazy: true
             provider: users_in_memory
 
+
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#firewalls-authentication
 
